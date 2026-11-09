@@ -34,7 +34,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: "Kira Radial ${{ github.ref_name }}"
+          releaseName: "Prism Radial ${{ github.ref_name }}"
           releaseBody: "Veja o CHANGELOG.md. Instalador sem assinatura digital — o Windows/Defender pode alertar (veja o README)."
           releaseDraft: true
           prerelease: false

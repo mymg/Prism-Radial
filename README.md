@@ -1,11 +1,11 @@
-# Kira Radial
+# Prism Radial
 
-Menu radial para Windows, com visual "frosted glass". Ele abre **onde o mouse está** ao pressionar um atalho global e executa ações que você configura: abrir programas, pastas e sites, enviar atalhos de teclado, controlar mídia, trocar a saída de áudio e mais.
+Menu radial para Windows com um núcleo de cristal animado que acompanha o mouse. Fork do [Kira Radial](https://github.com/Hideki515/Kira-Radial), de Hideki515. Ele abre **onde o mouse está** ao pressionar um atalho global e executa ações que você configura: abrir programas, pastas e sites, enviar atalhos de teclado, controlar mídia, trocar a saída de áudio e mais.
 
 Feito com **Tauri 2 (Rust) + React 18 + TypeScript + Vite**.
 
 <!-- Opcional: adicione uma captura em docs/screenshot.png e descomente a linha abaixo. -->
-<!-- ![Kira Radial](docs/screenshot.png) -->
+<!-- ![Prism Radial](docs/screenshot.png) -->
 
 ## Recursos
 - **Abre no cursor**, centralizado no mouse. Perto da borda, o menu é ajustado para caber no monitor (vários monitores e DPI).
@@ -27,17 +27,17 @@ Feito com **Tauri 2 (Rust) + React 18 + TypeScript + Vite**.
 - **Tela de configurações** com pré-visualização ao vivo, backup/restauração da configuração, ícone na bandeja e opção de iniciar com o Windows.
 
 ## Instalação
-Baixe o `Kira Radial_x.y.z_x64-setup.exe` na página **Releases** do repositório e execute. A instalação é por usuário e não pede administrador.
+Baixe o `Prism Radial_x.y.z_x64-setup.exe` na página **Releases** do repositório e execute. A instalação é por usuário e não pede administrador.
 
-As configurações ficam em `%APPDATA%\Kira-Radial\config.json`.
+As configurações ficam em `%APPDATA%\Prism-Radial\config.json`.
 
 ### Aviso sobre antivírus
 O instalador e o executável **não têm assinatura digital**. Por isso:
 - o SmartScreen pode avisar ao rodar o instalador ("Mais informações" → "Executar assim mesmo");
 - o Windows Defender pode acusar um **falso positivo** heurístico (ex.: `Trojan:Win32/Bearfoos.A!ml`).
 
-O alerta acontece porque o Kira usa recursos que malware também usa: hook de teclado (só enquanto você grava um atalho), envio de teclas a outros apps e início automático com o Windows. Para resolver:
-- adicione uma exclusão para `%LOCALAPPDATA%\Kira Radial` no Windows Defender, ou
+O alerta acontece porque o Prism Radial usa recursos que malware também usa: hook de teclado (só enquanto você grava um atalho), envio de teclas a outros apps e início automático com o Windows. Para resolver:
+- adicione uma exclusão para `%LOCALAPPDATA%\Prism Radial` no Windows Defender, ou
 - reporte o falso positivo em <https://www.microsoft.com/en-us/wdsi/filesubmission>.
 
 ## Desenvolvimento
@@ -93,6 +93,7 @@ git push --follow-tags
 A tag dispara o workflow **Release**, que compila no GitHub e cria uma Release em **rascunho** com o instalador anexado. Revise e publique.
 
 ## Créditos
+- Baseado no [Kira Radial](https://github.com/Hideki515/Kira-Radial), de Hideki515 (MIT).
 - Visual inspirado em [NakamuraIA/frosted-radial-menu](https://github.com/NakamuraIA/frosted-radial-menu) (MIT). O código deste projeto foi escrito do zero.
 - Ícones: [Lucide](https://lucide.dev) (ISC).
 

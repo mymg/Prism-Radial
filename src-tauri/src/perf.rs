@@ -1,4 +1,4 @@
-//! Log de diagnóstico de desempenho: %APPDATA%\Kira-Radial\perf.log
+//! Log de diagnóstico de desempenho: %APPDATA%\Prism-Radial\perf.log
 //! Recebe medições do Rust (abertura do menu) e do front (quadros, tarefas longas).
 
 use std::fs::OpenOptions;
@@ -11,7 +11,7 @@ pub fn now_ms() -> u64 {
 
 pub fn log(source: &str, msg: &str) {
     let line = format!("{} [{source}] {msg}\n", now_ms());
-    eprint!("[kira-radial] {line}");
+    eprint!("[prism-radial] {line}");
     let path = crate::config::config_dir().join("perf.log");
     // Evita crescer sem limite: recomeça acima de ~1 MB.
     if std::fs::metadata(&path).map(|m| m.len() > 1_000_000).unwrap_or(false) {

@@ -40,7 +40,7 @@ export function ProfilesPage({ config, selected, onSelect, update }: Props) {
     <>
       <Section
         title="Perfis por aplicativo"
-        description="Cada perfil tem suas próprias fatias. Ao abrir o menu, o Kira Radial verifica o app em primeiro plano e usa o perfil associado a ele; se nenhum combinar, usa o Padrão."
+        description="Cada perfil tem suas próprias fatias. Ao abrir o menu, o Prism Radial verifica o app em primeiro plano e usa o perfil associado a ele; se nenhum combinar, usa o Padrão."
       >
         <div className="profile-list">
           {config.profiles.map((p, i) => (

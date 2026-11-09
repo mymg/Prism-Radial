@@ -109,7 +109,7 @@ export function SettingsApp() {
       <nav className="sidebar">
         <div className="brand">
           <CircleDot size={20} />
-          <span>Kira Radial</span>
+          <span>Prism Radial</span>
         </div>
         {NAV.filter((n) => n.id !== "icon" || wantsOrb(draft.launcher.mode) || page === "icon").map(({ id, label, icon: Icon }) => (
           <button key={id} type="button" className={`nav-item${page === id ? " is-on" : ""}`} onClick={() => setPage(id)}>

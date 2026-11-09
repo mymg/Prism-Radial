@@ -14,13 +14,13 @@ export function useConfig(): Config | null {
     if (isTauri()) {
       onEvent<Config>("config:changed", (c) => alive && setConfig(c)).then((u) => (alive ? (off = u) : u()));
     } else {
-      window.addEventListener("kira:config-changed", load);
+      window.addEventListener("prism:config-changed", load);
       window.addEventListener("storage", load);
     }
     return () => {
       alive = false;
       off();
-      window.removeEventListener("kira:config-changed", load);
+      window.removeEventListener("prism:config-changed", load);
       window.removeEventListener("storage", load);
     };
   }, []);

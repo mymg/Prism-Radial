@@ -54,7 +54,7 @@ export function describeAction(a: Action): string {
 
 export async function runAction(action: Action): Promise<void> {
   if (!isTauri()) {
-    console.info("[kira-radial] ação (modo navegador):", action);
+    console.info("[prism-radial] ação (modo navegador):", action);
     if (action.type === "openSettings") window.open("/settings.html", "_blank");
     return;
   }
@@ -65,7 +65,7 @@ export async function hideMenu(): Promise<void> {
   if (isTauri()) await invoke("hide_menu");
 }
 
-const LS_KEY = "kira-radial:config";
+const LS_KEY = "prism-radial:config";
 
 export async function getConfig(): Promise<Config> {
   if (isTauri()) return withDefaults(await invoke<Config>("get_config"));
@@ -89,7 +89,7 @@ export async function saveConfig(config: Config): Promise<void> {
   } catch {
     /* ignora */
   }
-  window.dispatchEvent(new CustomEvent("kira:config-changed"));
+  window.dispatchEvent(new CustomEvent("prism:config-changed"));
 }
 
 /** Erro ao registrar o atalho global (ex.: já usado por outro programa), ou null. */

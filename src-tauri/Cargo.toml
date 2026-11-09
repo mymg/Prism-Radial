@@ -1,12 +1,12 @@
 [package]
-name = "kira-radial"
+name = "prism-radial"
 version = "0.3.4"
 description = "Menu radial para controle do Windows"
 license = "MIT"
 edition = "2021"
 
 [lib]
-name = "kira_radial_lib"
+name = "prism_radial_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

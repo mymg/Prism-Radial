@@ -1,4 +1,4 @@
-//! Kira Radial — menu radial para Windows.
+//! Prism Radial — menu radial para Windows.
 
 mod actions;
 mod audio;
@@ -37,7 +37,7 @@ pub fn run() {
             let handle = app.handle().clone();
 
             if let Err(e) = menu::apply_hotkey(&handle, &cfg) {
-                eprintln!("[kira-radial] {e}");
+                eprintln!("[prism-radial] {e}");
                 *handle.state::<AppState>().hotkey_error.lock().unwrap() = Some(e);
                 // Sem atalho o app ainda é usável pela bandeja; abre as configurações para corrigir.
                 menu::open_settings(&handle);
@@ -103,7 +103,7 @@ pub fn run() {
             keycapture::stop_key_capture,
         ])
         .run(tauri::generate_context!())
-        .expect("erro ao iniciar o Kira Radial");
+        .expect("erro ao iniciar o Prism Radial");
 }
 
 fn build_tray(app: &tauri::App) -> tauri::Result<()> {
@@ -118,7 +118,7 @@ fn build_tray(app: &tauri::App) -> tauri::Result<()> {
     let pause_item = pause.clone();
     TrayIconBuilder::with_id("main")
         .icon(app.default_window_icon().cloned().expect("ícone do app ausente"))
-        .tooltip("Kira Radial")
+        .tooltip("Prism Radial")
         .menu(&tray_menu)
         .show_menu_on_left_click(false)
         .on_menu_event(move |app, event| match event.id().as_ref() {

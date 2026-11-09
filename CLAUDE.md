@@ -1,16 +1,17 @@
-# Kira-Radial
+# Prism-Radial
 
 Menu radial para Windows — Tauri 2 + Rust (`src-tauri/`) + React 18/TS + Vite (`src/`). UI em pt-BR.
 
 ## Comandos
 - `npm run typecheck` · `npm test` (Vitest) · `cd src-tauri && cargo test`
-- Release: `npx tauri build --no-bundle` → `src-tauri/target/release/kira-radial.exe`
+- Release: `npx tauri build --no-bundle` → `src-tauri/target/release/prism-radial.exe`
 
 ## Regra de validação
 Após **todo** ajuste ou melhoria, chame o agente `qa-ab-tester` (`.claude/agents/qa-ab-tester.md`) informando o que mudou e **aguarde o veredito** (APROVADO/REPROVADO) antes de considerar a tarefa concluída. Se REPROVADO, corrija e rode de novo. Linha de base e relatórios ficam em `.claude/qa/`.
+Em sessões na nuvem (Linux) o QA completo não roda (precisa de Windows para `cargo test` e build): rode `npm run typecheck` e `npm test` e avise que a parte Rust/build fica para o CI ou o PC do usuário.
 
 ## Atualizar a cópia instalada
-O **usuário atualiza por conta própria** — não rode o script nem feche/reinstale o Kira instalado sem pedido explícito. Após QA APROVADO, apenas avise que há versão nova. Ferramenta disponível: `pwsh -File scripts/update-installed.ps1` (gera o instalador NSIS, fecha o Kira aberto, instala com `/S` e reabre).
+O **usuário atualiza por conta própria** — não rode o script nem feche/reinstale o Prism instalado sem pedido explícito. Após QA APROVADO, apenas avise que há versão nova. Ferramenta disponível: `pwsh -File scripts/update-installed.ps1` (gera o instalador NSIS, fecha o Prism aberto, instala com `/S` e reabre).
 
 ## Git / GitHub
 - Repositório privado no GitHub (`main`), licença MIT. Projeto solo: commits direto em `main`.

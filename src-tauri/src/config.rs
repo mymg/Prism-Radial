@@ -1,4 +1,4 @@
-//! Configuração persistida em %APPDATA%\Kira-Radial\config.json.
+//! Configuração persistida em %APPDATA%\Prism-Radial\config.json.
 //!
 //! O Rust só tipa o que precisa (atalho, comportamento, perfis/executáveis); itens e
 //! aparência ficam como `serde_json::Value` e são preservados intactos. O schema
@@ -167,7 +167,7 @@ impl Config {
 
 pub fn config_dir() -> PathBuf {
     let base = std::env::var_os("APPDATA").map(PathBuf::from).unwrap_or_else(std::env::temp_dir);
-    base.join("Kira-Radial")
+    base.join("Prism-Radial")
 }
 
 pub fn config_path() -> PathBuf {
@@ -182,7 +182,7 @@ pub fn load() -> Config {
         Ok(text) => match parse(&text) {
             Ok(c) => c,
             Err(e) => {
-                eprintln!("[kira-radial] config inválida ({e}); usando padrão");
+                eprintln!("[prism-radial] config inválida ({e}); usando padrão");
                 let _ = fs::rename(&path, path.with_file_name("config.invalid.json"));
                 let c = Config::default_config();
                 let _ = save(&c);

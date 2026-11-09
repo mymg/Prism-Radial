@@ -101,7 +101,7 @@ export function Orb({ size, accent, opacityIdle, imageSrc, onActivate, onDragSta
       <button
         type="button"
         className={`orb${imageSrc ? " has-image" : ""}`}
-        aria-label="Abrir o menu Kira"
+        aria-label="Abrir o menu Prism"
         data-testid="orb"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

@@ -84,7 +84,7 @@ pub fn show_from(app: &AppHandle, origin: Origin) -> Result<(), String> {
     let win = radial(app)?;
     let cfg = state.config();
 
-    // Captura o app em foco ANTES de mostrar o menu (ignorando as janelas do próprio Kira:
+    // Captura o app em foco ANTES de mostrar o menu (ignorando as janelas do próprio Prism:
     // se o clique no ícone tiver ativado alguma, usa a janela de app logo abaixo).
     let own = win.hwnd().map(|h| h.0 as isize).unwrap_or(0);
     let orb = crate::orb::hwnd(app);
@@ -173,7 +173,7 @@ pub fn on_shortcut(app: &AppHandle, event: ShortcutState) {
         _ => Ok(()),
     };
     if let Err(e) = result {
-        eprintln!("[kira-radial] erro ao abrir menu: {e}");
+        eprintln!("[prism-radial] erro ao abrir menu: {e}");
     }
 }
 
@@ -267,7 +267,7 @@ pub fn set_paused(app: &AppHandle, paused: bool) {
             let _ = gs.unregister(sc);
         } else if !gs.is_registered(sc) {
             if let Err(e) = gs.register(sc) {
-                eprintln!("[kira-radial] falha ao retomar atalho: {e}");
+                eprintln!("[prism-radial] falha ao retomar atalho: {e}");
             }
         }
     }

@@ -1,4 +1,4 @@
-// Diagnóstico de desempenho do menu. As medições vão para %APPDATA%\Kira-Radial\perf.log
+// Diagnóstico de desempenho do menu. As medições vão para %APPDATA%\Prism-Radial\perf.log
 // (via comando "perf_log"); no navegador, para o console.
 import { isTauri } from "./ipc";
 

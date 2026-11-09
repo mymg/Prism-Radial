@@ -37,6 +37,6 @@ console.log(`${cargoPath}: ${m[1]} → ${version}`);
 
 // package-lock.json e Cargo.lock acompanham.
 execFileSync("npm", ["install", "--package-lock-only", "--ignore-scripts"], { cwd: root, stdio: "inherit", shell: true });
-execFileSync("cargo", ["update", "-p", "kira-radial", "--offline"], { cwd: file("src-tauri"), stdio: "inherit" });
+execFileSync("cargo", ["update", "-p", "prism-radial", "--offline"], { cwd: file("src-tauri"), stdio: "inherit" });
 
 console.log(`\nPróximos passos:\n  1. Atualize o CHANGELOG.md\n  2. git commit -am "v${version}"\n  3. git tag -a v${version} -m "v${version}" && git push --follow-tags`);

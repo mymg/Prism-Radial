@@ -1,11 +1,11 @@
-# Pré-requisitos para compilar o Kira Radial a partir do código-fonte (Windows 10/11).
+# Pré-requisitos para compilar o Prism Radial a partir do código-fonte (Windows 10/11).
 # Para instalar tudo de uma vez, rode na raiz do projeto:
 #
 #   powershell -ExecutionPolicy RemoteSigned -File scripts\install-prerequisites.ps1
 #
 # Formato: um pacote do winget por linha -> <id do winget> [? comando que já indica instalado] [| argumentos extras do winget]
 # Linhas começando com # são ignoradas. O que já estiver instalado é pulado.
-# (Só para USAR a Kira, não precisa de nada disso: baixe o instalador na página Releases.)
+# (Só para USAR o Prism Radial, não precisa de nada disso: baixe o instalador na página Releases.)
 
 # Node.js (LTS) — front-end React/Vite e npm
 OpenJS.NodeJS.LTS ? node

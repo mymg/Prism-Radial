@@ -131,7 +131,7 @@ pub fn on_moved(app: &AppHandle, x: i32, y: i32) {
         cfg.launcher.orb.x = Some(x);
         cfg.launcher.orb.y = Some(y);
         if let Err(e) = config::save(&cfg) {
-            eprintln!("[kira-radial] falha ao salvar posição do ícone: {e}");
+            eprintln!("[prism-radial] falha ao salvar posição do ícone: {e}");
         }
     });
 }
@@ -339,7 +339,7 @@ mod image_tests {
 
     #[test]
     fn le_arquivo_e_recusa_grande_demais() {
-        let dir = std::env::temp_dir().join("kira-orb-test");
+        let dir = std::env::temp_dir().join("prism-orb-test");
         std::fs::create_dir_all(&dir).unwrap();
         let ok = dir.join("a.gif");
         std::fs::write(&ok, b"GIF89a").unwrap();

@@ -35,7 +35,7 @@ fn describe(hwnd: HWND) -> Foreground {
     Foreground { hwnd: hwnd.0 as isize, exe: exe_name(pid) }
 }
 
-/// Janela de app em foco, ignorando `exclude` (janelas do Kira). Se o foco estiver numa
+/// Janela de app em foco, ignorando `exclude` (janelas do Prism). Se o foco estiver numa
 /// delas, devolve a primeira janela de app visível abaixo na ordem Z.
 pub fn current_app(exclude: &[isize]) -> Foreground {
     let fg = current();
@@ -117,7 +117,7 @@ pub fn visible_window_exes() -> Vec<String> {
     let mut exes: Vec<String> = pids
         .into_iter()
         .filter_map(exe_name)
-        .filter(|e| e != "kira-radial.exe" && e != "applicationframehost.exe" && e != "textinputhost.exe")
+        .filter(|e| e != "prism-radial.exe" && e != "applicationframehost.exe" && e != "textinputhost.exe")
         .collect();
     exes.sort();
     exes.dedup();
