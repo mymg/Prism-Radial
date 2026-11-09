@@ -1,5 +1,5 @@
 import { parseCombo } from "./keys";
-import { LAUNCHER_MODES, LIMITS, ORB_LIMITS, THEMES, wantsHotkey, type Action, type Config, type MenuItem } from "./types";
+import { LAUNCHER_MODES, LIMITS, ORB_LIMITS, PRISM_LIMITS, THEMES, wantsHotkey, type Action, type Config, type MenuItem } from "./types";
 
 /** Valida a configuração inteira. Retorna mensagens legíveis; lista vazia = válida. */
 export function validateConfig(c: Config): string[] {
@@ -22,6 +22,17 @@ export function validateConfig(c: Config): string[] {
   if (c.appearance.scale < 0.5 || c.appearance.scale > 1.6) errors.push("Escala deve estar entre 0,5 e 1,6.");
   if (c.appearance.theme !== undefined && !THEMES.includes(c.appearance.theme))
     errors.push(`Tema desconhecido: "${c.appearance.theme}".`);
+  const prism = c.appearance.prism;
+  if (prism) {
+    const names: Record<keyof typeof PRISM_LIMITS, string> = {
+      size: "Proximidade", parallax: "Parallax", tilt: "Inclinação", glow: "Brilho", chroma: "Aberração cromática",
+    };
+    for (const k of Object.keys(PRISM_LIMITS) as (keyof typeof PRISM_LIMITS)[]) {
+      const [min, max] = PRISM_LIMITS[k];
+      if (!(typeof prism[k] === "number" && prism[k] >= min && prism[k] <= max))
+        errors.push(`Tema Prisma: ${names[k]} deve estar entre ${min} e ${max}.`);
+    }
+  }
   if (!c.profiles.length) errors.push("É necessário ao menos um perfil.");
 
   const ids = new Set<string>();

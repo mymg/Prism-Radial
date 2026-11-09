@@ -4,6 +4,7 @@ import { CenterHub } from "./CenterHub";
 import { HoloBack, HoloFront, HoloScan } from "./HoloLayer";
 import { LAYOUT, polar, sliceAngle } from "./geometry";
 import { MainSlice } from "./MainSlice";
+import { PrismCore } from "./PrismCore";
 import { SubmenuRing } from "./SubmenuRing";
 
 export interface RadialCanvasProps {
@@ -42,9 +43,11 @@ export function RadialCanvas({ items, activeMain, activeSub, openMain, hubHovere
   const subOpen = subParent !== null && children.length > 0;
   // Pré-visualização: escurece só com um subitem escolhido (como antes). Menu real: sempre que o sub-anel está aberto.
   const dimOthers = openMain === undefined ? activeSub !== null : subOpen;
-  const holo = appearance.theme === "holo";
+  const theme = appearance.theme ?? "glass";
+  const holo = theme === "holo";
+  const prism = theme === "prism";
   return (
-    <svg className={`radial-canvas theme-${holo ? "holo" : "glass"}`} viewBox={`0 0 ${LAYOUT.size} ${LAYOUT.size}`} role="menu" aria-label="Menu radial">
+    <svg className={`radial-canvas theme-${theme}`} viewBox={`0 0 ${LAYOUT.size} ${LAYOUT.size}`} role="menu" aria-label="Menu radial">
       <defs>
         <radialGradient id="slice-glass" cx={C} cy={C} r={LAYOUT.subOuter} gradientUnits="userSpaceOnUse">
           <stop offset="0.35" stopColor="#0a0f17" />
@@ -114,11 +117,22 @@ export function RadialCanvas({ items, activeMain, activeSub, openMain, hubHovere
 
       <CenterHub
         stats={stats}
-        showCpu={appearance.showCpu}
-        showClock={appearance.showClock}
+        showCpu={appearance.showCpu && !prism}
+        showClock={appearance.showClock && !prism}
+        bare={prism}
         hovered={hubHovered}
         inSubmenu={openMain === undefined ? activeSub !== null : subOpen}
       />
+      {/* Por cima do disco central (que escurece o fundo) e dos anéis. */}
+      {prism && (
+        <PrismCore
+          accent={appearance.accent}
+          prism={appearance.prism}
+          lookAngle={activeMain !== null ? sliceAngle(activeMain, items.length) : null}
+          lookColor={activeMain !== null ? items[activeMain]?.color : undefined}
+          hubHovered={hubHovered}
+        />
+      )}
       {holo && <HoloFront />}
     </svg>
   );

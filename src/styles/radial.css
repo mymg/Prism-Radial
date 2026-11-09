@@ -303,6 +303,26 @@ html.is-tauri body { background: transparent; }
 }
 
 /* ======================================================================
+   Tema Prisma — cubo de cristal no centro (PrismCore.tsx). O canvas fica
+   num <foreignObject> por cima das fatias e não recebe cliques.
+   ====================================================================== */
+.prism-core { pointer-events: none; overflow: visible; }
+.prism-core-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+.prism-core-wrap canvas { display: block; }
+.theme-prism .hub-well {
+  fill: #060914;
+  fill-opacity: 0.88;
+  stroke: color-mix(in srgb, var(--active) 18%, transparent);
+}
+.theme-prism .center-hub.is-hovered .hub-well { stroke: color-mix(in srgb, var(--active) 45%, transparent); }
+
+/* ======================================================================
    Abrir a partir do ícone flutuante: o menu "nasce" do ícone e se
    recolhe de volta para ele. --from-x/--from-y = deslocamento do ícone até
    o centro do menu; --from-s = tamanho do ícone ÷ tamanho do menu.

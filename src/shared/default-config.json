@@ -13,7 +13,17 @@
   },
   "appearance": {
     "scale": 0.75,
-    "accent": "#4ade9b",
+    "accent": "#a9dcff",
+    "theme": "prism",
+    "prism": {
+      "size": 1.35,
+      "parallax": 18,
+      "tilt": 12,
+      "glow": 0.7,
+      "chroma": 2,
+      "lookAt": true,
+      "breathe": true
+    },
     "showCpu": true,
     "showClock": true
   },

@@ -65,8 +65,10 @@ export interface Config {
   appearance: {
     scale: number;
     accent: string;
-    /** Visual do menu. Ausente = "glass". "holo" = HUD holográfico em wireframe. */
+    /** Visual do menu. Ausente = "glass". "holo" = HUD holográfico em wireframe. "prism" = cubo de cristal. */
     theme?: Theme;
+    /** Ajustes do tema Prisma. Ausente = PRISM_DEFAULTS. */
+    prism?: PrismConfig;
     showCpu: boolean;
     showClock: boolean;
   };
@@ -100,9 +102,47 @@ export interface Launcher {
 
 export const ORB_LIMITS = { minSize: 56, maxSize: 160, minOpacity: 0.4, maxOpacity: 1 } as const;
 
-export type Theme = "glass" | "holo";
-export const THEMES: readonly Theme[] = ["glass", "holo"];
+export type Theme = "glass" | "holo" | "prism";
+export const THEMES: readonly Theme[] = ["glass", "holo", "prism"];
 /** Cor de destaque sugerida ao escolher o tema holográfico. */
 export const HOLO_ACCENT = "#ffb03a";
+/** Cor de destaque sugerida ao escolher o tema Prisma. */
+export const PRISM_ACCENT = "#a9dcff";
+
+/** Núcleo do tema Prisma: cubo de cristal que acompanha o cursor. */
+export interface PrismConfig {
+  /** Proximidade: escala do cubo (1 = cabe no centro; maior = parece mais perto). */
+  size: number;
+  /** Deslocamento máximo do parallax, em px do menu. */
+  parallax: number;
+  /** Inclinação 3D máxima, em graus. */
+  tilt: number;
+  /** Intensidade do brilho (0–1). */
+  glow: number;
+  /** Separação de cores nas bordas, em px (0 = desligado). */
+  chroma: number;
+  /** O cubo se vira para a fatia sob o cursor. */
+  lookAt: boolean;
+  /** Respiração e flutuação. */
+  breathe: boolean;
+}
+
+export const PRISM_DEFAULTS: PrismConfig = {
+  size: 1.35,
+  parallax: 18,
+  tilt: 12,
+  glow: 0.7,
+  chroma: 2,
+  lookAt: true,
+  breathe: true,
+};
+
+export const PRISM_LIMITS = {
+  size: [0.8, 1.8],
+  parallax: [0, 40],
+  tilt: [0, 25],
+  glow: [0, 1],
+  chroma: [0, 6],
+} as const satisfies Record<string, readonly [number, number]>;
 
 export const LIMITS = { minSlices: 3, maxSlices: 10, maxChildren: 8 } as const;

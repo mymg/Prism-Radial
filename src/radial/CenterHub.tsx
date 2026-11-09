@@ -8,12 +8,14 @@ interface Props {
   showClock: boolean;
   hovered: boolean;
   inSubmenu: boolean;
+  /** Sem disco nem textos: o centro é ocupado por outra camada (tema Prisma). */
+  bare?: boolean;
 }
 
 const GAUGE_R = 88;
 const CIRC = 2 * Math.PI * GAUGE_R;
 
-export function CenterHub({ stats, showCpu, showClock, hovered, inSubmenu }: Props) {
+export function CenterHub({ stats, showCpu, showClock, hovered, inSubmenu, bare = false }: Props) {
   const { time, date } = useClock();
   const c = LAYOUT.size / 2;
   const cpu = stats ? Math.round(stats.cpu) : null;
@@ -21,7 +23,7 @@ export function CenterHub({ stats, showCpu, showClock, hovered, inSubmenu }: Pro
   return (
     <g className={`center-hub${hovered ? " is-hovered" : ""}`} aria-label={inSubmenu ? "Voltar" : "Fechar"}>
       <circle cx={c} cy={c} r={LAYOUT.mainInner - 6} className="hub-well" />
-      <circle cx={c} cy={c} r={LAYOUT.hubRadius} className="hub-disc" />
+      {!bare && <circle cx={c} cy={c} r={LAYOUT.hubRadius} className="hub-disc" />}
       {showCpu && (
         <>
           <circle cx={c} cy={c} r={GAUGE_R} className="hub-track" />

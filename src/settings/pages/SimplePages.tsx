@@ -1,7 +1,7 @@
 import { Check, Clipboard, RotateCcw, Upload } from "lucide-react";
 import { useState } from "react";
 import { cloneConfig, defaultConfig, withDefaults } from "../../shared/defaults";
-import { HOLO_ACCENT, wantsHotkey, wantsOrb, type Config, type LauncherMode, type Theme } from "../../shared/types";
+import { HOLO_ACCENT, PRISM_ACCENT, PRISM_DEFAULTS, PRISM_LIMITS, wantsHotkey, wantsOrb, type Config, type LauncherMode, type PrismConfig, type Theme } from "../../shared/types";
 import { Field, Section, Segmented, Toggle } from "../controls";
 import { HotkeyRecorder } from "../HotkeyRecorder";
 
@@ -91,7 +91,7 @@ export function HotkeyPage({ config, update }: PageProps) {
   );
 }
 
-const ACCENTS = ["#4ade9b", "#43c7d9", "#a78bfa", "#e879d8", "#f2c46d", HOLO_ACCENT, "#ff5c7a"];
+const ACCENTS = [PRISM_ACCENT, "#4ade9b", "#43c7d9", "#a78bfa", "#e879d8", "#f2c46d", HOLO_ACCENT, "#ff5c7a"];
 const GLASS_ACCENT = "#4ade9b";
 
 /** Troca o tema e sugere a cor que combina com ele (sem sobrescrever uma cor personalizada). */
@@ -99,8 +99,49 @@ export function applyTheme(c: Config, theme: Theme) {
   const prev = c.appearance.theme ?? "glass";
   if (prev === theme) return;
   c.appearance.theme = theme;
-  if (theme === "holo" && c.appearance.accent === GLASS_ACCENT) c.appearance.accent = HOLO_ACCENT;
-  if (theme === "glass" && c.appearance.accent === HOLO_ACCENT) c.appearance.accent = GLASS_ACCENT;
+  // Só troca a cor se ela ainda for a sugerida pelo tema anterior (preserva cor personalizada).
+  if (c.appearance.accent === THEME_ACCENT[prev]) c.appearance.accent = THEME_ACCENT[theme];
+  if (theme === "prism" && !c.appearance.prism) c.appearance.prism = { ...PRISM_DEFAULTS };
+}
+
+const THEME_ACCENT: Record<Theme, string> = { glass: GLASS_ACCENT, holo: HOLO_ACCENT, prism: PRISM_ACCENT };
+
+/** Controle deslizante de um ajuste numérico do tema Prisma. */
+function PrismSlider({ k, label, step, format, prism, update }: {
+  k: keyof typeof PRISM_LIMITS; label: string; step: number; format: (v: number) => string;
+  prism: PrismConfig; update: PageProps["update"];
+}) {
+  const [min, max] = PRISM_LIMITS[k];
+  return (
+    <Field label={`${label}: ${format(prism[k])}`}>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={prism[k]}
+        onChange={(e) => update((c) => void (c.appearance.prism = { ...PRISM_DEFAULTS, ...c.appearance.prism, [k]: Number(e.target.value) }))}
+      />
+    </Field>
+  );
+}
+
+function PrismSettings({ prism, update }: { prism: PrismConfig; update: PageProps["update"] }) {
+  const set = (patch: Partial<PrismConfig>) =>
+    update((c) => void (c.appearance.prism = { ...PRISM_DEFAULTS, ...c.appearance.prism, ...patch }));
+  const pct = (v: number) => `${Math.round(v * 100)}%`;
+  return (
+    <>
+      <p className="muted">Cubo de cristal animado que acompanha o mouse. O relógio e o medidor de CPU não aparecem neste tema.</p>
+      <PrismSlider k="size" label="Proximidade" step={0.05} format={pct} prism={prism} update={update} />
+      <PrismSlider k="parallax" label="Intensidade do parallax" step={1} format={(v) => `${v} px`} prism={prism} update={update} />
+      <PrismSlider k="tilt" label="Inclinação 3D" step={1} format={(v) => `${v}°`} prism={prism} update={update} />
+      <PrismSlider k="glow" label="Brilho" step={0.05} format={pct} prism={prism} update={update} />
+      <PrismSlider k="chroma" label="Aberração cromática" step={0.5} format={(v) => `${v.toFixed(1)} px`} prism={prism} update={update} />
+      <Toggle label="Olhar para a fatia sob o cursor" checked={prism.lookAt} onChange={(v) => set({ lookAt: v })} />
+      <Toggle label="Respiração e flutuação" checked={prism.breathe} onChange={(v) => set({ breathe: v })} />
+    </>
+  );
 }
 
 export function AppearancePage({ config, update }: PageProps) {
@@ -113,6 +154,7 @@ export function AppearancePage({ config, update }: PageProps) {
           options={[
             { value: "glass", label: "Vidro" },
             { value: "holo", label: "Holográfico" },
+            { value: "prism", label: "Prisma" },
           ]}
           onChange={(t) => update((c) => applyTheme(c, t))}
         />
@@ -120,6 +162,7 @@ export function AppearancePage({ config, update }: PageProps) {
       {a.theme === "holo" && (
         <p className="muted">HUD em wireframe com esfera e anéis animados. Usa a cor de destaque abaixo (âmbar por padrão; azul-ciano também fica bom).</p>
       )}
+      {a.theme === "prism" && <PrismSettings prism={{ ...PRISM_DEFAULTS, ...a.prism }} update={update} />}
       <Field label={`Tamanho: ${Math.round(a.scale * 100)}%`}>
         <input type="range" min={0.5} max={1.4} step={0.05} value={a.scale} onChange={(e) => update((c) => void (c.appearance.scale = Number(e.target.value)))} />
       </Field>

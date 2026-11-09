@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0
+
+- **Novo nome: Prism Radial.** Fork do [Kira Radial](https://github.com/Hideki515/Kira-Radial), de Hideki515. As configurações agora ficam em `%APPDATA%\Prism-Radial`, então o app pode ficar instalado junto com o Kira.
+- **Tema Prisma (novo padrão)**: um cubo de cristal animado no centro do menu.
+  - Acompanha o mouse em camadas (parallax) e inclina em 3D; vira-se para a fatia sob o cursor.
+  - Núcleo de luz, raios, partículas em órbita e separação de cores nas bordas.
+  - Ajustes em Configurações → Aparência: proximidade, parallax, inclinação, brilho, aberração cromática, "olhar para a fatia" e respiração.
+  - O relógio e o medidor de CPU não aparecem neste tema.
+  - Respeita "reduzir animações" do Windows.
+
 ## 0.3.4
 
 - **Correção:** o ícone não sumia ao escolher "Esconder ícone" (no botão direito ou na bandeja), ao trocar o modo de abertura para "Atalho" nem em tela cheia.
