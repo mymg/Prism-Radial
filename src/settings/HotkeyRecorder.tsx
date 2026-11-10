@@ -87,8 +87,10 @@ export function HotkeyRecorder({ value, onChange, requireModifier, pauseGlobal }
         if (pauseGlobal) void setHotkeyPaused(false);
       }}
       onKeyDown={(e) => {
-        // No app as teclas são capturadas pelo backend; este caminho é o do navegador.
-        if (isTauri()) return;
+        // No app o hook do backend bloqueia as teclas antes de chegarem aqui. Se uma tecla
+        // chegou, o hook não está capturando (falhou ou foi removido pelo Windows): grava
+        // por aqui mesmo, como no navegador. Só combinações com a tecla Win dependem do hook.
+        if (isTauri()) void stopKeyCapture();
         e.preventDefault();
         e.stopPropagation();
         const noMods = !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey;

@@ -74,12 +74,17 @@ pub fn format_combo(mods: u8, key: &str) -> String {
     parts.join("+")
 }
 
-fn finish(c: &mut Capture, event: &str, payload: Option<String>) {
+fn finish(c: &mut Capture, event: &'static str, payload: Option<String>) {
     c.done = true;
-    let _ = match payload {
-        Some(p) => c.app.emit_to(SETTINGS, event, p),
-        None => c.app.emit_to(SETTINGS, event, ()),
-    };
+    // Emite fora do hook: o hook roda com STATE travado e precisa voltar rápido, senão o
+    // Windows o remove em silêncio (LowLevelHooksTimeout) e a gravação fica esperando.
+    let app = c.app.clone();
+    std::thread::spawn(move || {
+        let _ = match payload {
+            Some(p) => app.emit_to(SETTINGS, event, p),
+            None => app.emit_to(SETTINGS, event, ()),
+        };
+    });
     if c.held == 0 {
         unsafe {
             let _ = PostThreadMessageW(c.thread_id, WM_QUIT, WPARAM(0), LPARAM(0));

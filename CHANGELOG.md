@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+- **Correção:** a gravação de um atalho novo ficava esperando e não reconhecia a combinação.
+  - O gancho de teclado agora responde na hora e envia o resultado separado, para o Windows não desligá-lo no meio da gravação.
+  - Se o gancho falhar mesmo assim, a caixa grava a combinação pela própria tela. Só combinações com a tecla Win dependem do gancho.
+
 ## 0.4.0
 
 - **Novo nome: Prism Radial.** Fork do [Kira Radial](https://github.com/Hideki515/Kira-Radial), de Hideki515. As configurações agora ficam em `%APPDATA%\Prism-Radial`, então o app pode ficar instalado junto com o Kira.
