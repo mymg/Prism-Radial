@@ -1,7 +1,9 @@
-import { ChevronDown, ChevronUp, CornerDownRight, Plus, Sparkles, Trash2 } from "lucide-react";
-import type { CSSProperties } from "react";
+import { ChevronDown, ChevronUp, CornerDownRight, ImagePlus, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { useState, type CSSProperties } from "react";
+import { useIconImage } from "../../hooks/useIconImage";
 import { getIcon, ICONS } from "../../shared/icons";
-import { LIMITS, type MenuItem, type Profile } from "../../shared/types";
+import { pickIconImage } from "../../shared/ipc";
+import { LIMITS, isIconImagePath, type MenuItem, type Profile } from "../../shared/types";
 import { ActionEditor, defaultAction } from "../ActionEditor";
 import { Field, Segmented } from "../controls";
 
@@ -19,6 +21,52 @@ interface Props {
 }
 
 const COLORS = ["#4ade9b", "#43c7d9", "#f2c46d", "#a78bfa", "#e879d8", "#ff5c7a", "#9aa5b8"];
+
+/** Ícone de um item: a imagem própria, se houver e carregar; senão o ícone embutido. */
+function ItemIcon({ item, size }: { item: MenuItem; size: number }) {
+  const src = useIconImage(item.iconImage);
+  const Icon = getIcon(item.icon);
+  return src ? (
+    <img src={src} alt="" width={size} height={size} className="item-icon-image" />
+  ) : (
+    <Icon size={size} />
+  );
+}
+
+/** Escolha de uma imagem própria para o item selecionado. */
+function IconImagePicker({ item, onChange }: { item: MenuItem; onChange: (path: string | undefined) => void }) {
+  const [error, setError] = useState<string | null>(null);
+  const src = useIconImage(item.iconImage);
+  const pick = async () => {
+    const path = await pickIconImage();
+    if (!path) return;
+    if (!isIconImagePath(path)) return void setError("Formato não suportado. Use PNG, SVG, ICO, JPG, WebP ou GIF.");
+    setError(null);
+    onChange(path);
+  };
+  return (
+    <div className="icon-image-row">
+      {item.iconImage && (
+        <span className="icon-image-current" title={item.iconImage}>
+          {src ? <img src={src} alt="" width={22} height={22} className="item-icon-image" /> : null}
+          <span className="icon-image-path">{item.iconImage.split(/[\\/]/).pop()}</span>
+        </span>
+      )}
+      <button type="button" className="btn btn-ghost" onClick={() => void pick()}>
+        <ImagePlus size={14} /> {item.iconImage ? "Trocar imagem" : "Usar imagem própria"}
+      </button>
+      {item.iconImage && (
+        <button type="button" className="btn btn-ghost" onClick={() => { setError(null); onChange(undefined); }}>
+          <X size={14} /> Remover imagem
+        </button>
+      )}
+      {error && <span className="field-hint is-error">{error}</span>}
+      {item.iconImage && !src && !error && (
+        <span className="field-hint">Se a imagem não carregar, o ícone escolhido acima é usado.</span>
+      )}
+    </div>
+  );
+}
 
 let seq = 0;
 const newId = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(seq++).toString(36)}`;
@@ -85,12 +133,11 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
         </div>
         <ol className="tree-list">
           {items.map((it, mi) => {
-            const Icon = getIcon(it.icon);
             const isSel = selection.main === mi && selection.child === null;
             return (
               <li key={it.id}>
                 <div className={`tree-row${isSel ? " is-selected" : ""}`} onClick={() => onSelect({ main: mi, child: null })}>
-                  <Icon size={16} />
+                  <ItemIcon item={it} size={16} />
                   <span className="tree-label">{it.label || "(sem nome)"}</span>
                   {it.dynamic ? (
                     <span className="tree-badge" title="Submenu automático"><Sparkles size={11} /></span>
@@ -106,7 +153,6 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
                 {it.children && (
                   <ol className="tree-children">
                     {it.children.map((ch, ci) => {
-                      const CIcon = getIcon(ch.icon);
                       const sel = selection.main === mi && selection.child === ci;
                       return (
                         <li key={ch.id}>
@@ -116,7 +162,7 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
                             onClick={() => onSelect({ main: mi, child: ci })}
                           >
                             <CornerDownRight size={13} className="tree-elbow" />
-                            <CIcon size={15} />
+                            <ItemIcon item={ch} size={15} />
                             <span className="tree-label">{ch.label || "(sem nome)"}</span>
                             <RowTools onUp={() => reorder(mi, ci, -1)} onDown={() => reorder(mi, ci, 1)} onDelete={() => remove(mi, ci)} />
                           </div>
@@ -145,7 +191,7 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
             <input value={selected.label} maxLength={14} onChange={(e) => editSelected((it) => void (it.label = e.target.value))} />
           </Field>
 
-          <Field label="Ícone">
+          <Field label="Ícone" group>
             <div className="icon-grid">
               {Object.entries(ICONS).map(([name, Icon]) => (
                 <button
@@ -159,6 +205,15 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
                 </button>
               ))}
             </div>
+            <IconImagePicker
+              item={selected}
+              onChange={(path) =>
+                editSelected((it) => {
+                  if (path) it.iconImage = path;
+                  else delete it.iconImage;
+                })
+              }
+            />
           </Field>
 
           {selection.child !== null && (

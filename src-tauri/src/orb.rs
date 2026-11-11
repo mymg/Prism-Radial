@@ -188,6 +188,20 @@ pub fn image_mime(path: &str) -> Option<&'static str> {
     }
 }
 
+/// Tipo MIME das imagens aceitas como ícone de fatia (estáticas ou animadas).
+pub fn icon_mime(path: &str) -> Option<&'static str> {
+    let ext = path.rsplit('.').next()?.to_ascii_lowercase();
+    match ext.as_str() {
+        "svg" => Some("image/svg+xml"),
+        "ico" => Some("image/x-icon"),
+        "jpg" | "jpeg" => Some("image/jpeg"),
+        _ => image_mime(path),
+    }
+}
+
+/// Limite de tamanho da imagem de um ícone de fatia.
+pub const MAX_ICON_BYTES: u64 = 2 * 1024 * 1024;
+
 fn base64(data: &[u8]) -> String {
     const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::with_capacity(data.len().div_ceil(3) * 4);
@@ -205,12 +219,26 @@ fn base64(data: &[u8]) -> String {
 /// Lê a imagem do ícone e devolve `data:<mime>;base64,...`.
 pub fn read_image(path: &str) -> Result<String, String> {
     let mime = image_mime(path).ok_or("formato não suportado (use GIF, WebP ou PNG)")?;
+    read_data_url(path, mime, MAX_IMAGE_BYTES)
+}
+
+/// Lê a imagem de um ícone de fatia e devolve `data:<mime>;base64,...`.
+pub fn read_icon_image(path: &str) -> Result<String, String> {
+    let mime = icon_mime(path).ok_or("formato não suportado (use PNG, SVG, ICO, JPG, WebP ou GIF)")?;
+    read_data_url(path, mime, MAX_ICON_BYTES)
+}
+
+fn read_data_url(path: &str, mime: &str, max_bytes: u64) -> Result<String, String> {
     let meta = std::fs::metadata(path).map_err(|e| format!("não foi possível abrir a imagem: {e}"))?;
     if !meta.is_file() {
         return Err("o caminho não é um arquivo".into());
     }
-    if meta.len() > MAX_IMAGE_BYTES {
-        return Err(format!("imagem muito grande ({:.1} MB; máximo 8 MB)", meta.len() as f64 / 1_048_576.0));
+    if meta.len() > max_bytes {
+        return Err(format!(
+            "imagem muito grande ({:.1} MB; máximo {} MB)",
+            meta.len() as f64 / 1_048_576.0,
+            max_bytes / 1_048_576
+        ));
     }
     let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
     Ok(format!("data:{mime};base64,{}", base64(&bytes)))
@@ -326,6 +354,27 @@ mod image_tests {
         assert_eq!(image_mime("x.exe"), None);
         assert_eq!(image_mime("semextensao"), None);
         assert!(read_image("nada.exe").is_err());
+    }
+
+    #[test]
+    fn icone_de_fatia_aceita_tambem_svg_ico_e_jpg() {
+        assert_eq!(icon_mime(r"C:\icones\steam.SVG"), Some("image/svg+xml"));
+        assert_eq!(icon_mime("x.ico"), Some("image/x-icon"));
+        assert_eq!(icon_mime("x.jpeg"), Some("image/jpeg"));
+        assert_eq!(icon_mime("x.png"), Some("image/png"));
+        assert_eq!(icon_mime("x.exe"), None);
+        // A imagem do orbe continua restrita aos formatos animados.
+        assert_eq!(image_mime("x.svg"), None);
+        assert!(read_icon_image("nada.exe").is_err());
+
+        let dir = std::env::temp_dir().join("prism-icon-test");
+        std::fs::create_dir_all(&dir).unwrap();
+        let ok = dir.join("a.svg");
+        std::fs::write(&ok, b"<svg/>").unwrap();
+        assert_eq!(read_icon_image(ok.to_str().unwrap()).unwrap(), "data:image/svg+xml;base64,PHN2Zy8+");
+        let big = dir.join("big.png");
+        std::fs::File::create(&big).unwrap().set_len(MAX_ICON_BYTES + 1).unwrap();
+        assert!(read_icon_image(big.to_str().unwrap()).unwrap_err().contains("máximo 2 MB"));
     }
 
     #[test]

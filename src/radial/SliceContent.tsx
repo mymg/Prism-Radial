@@ -1,30 +1,47 @@
+import { useIconImage } from "../hooks/useIconImage";
 import { getIcon } from "../shared/icons";
 
 interface Props {
   x: number;
   y: number;
   icon: string;
+  /** Imagem própria; enquanto carrega (ou se falhar), mostra `icon`. */
+  image?: string;
   label: string;
   size: "main" | "sub";
   active?: boolean;
 }
 
 /** Ícone + rótulo empilhados, centrados em (x, y). Tudo em SVG puro (sem foreignObject). */
-export function SliceContent({ x, y, icon, label, size, active }: Props) {
+export function SliceContent({ x, y, icon, image, label, size, active }: Props) {
+  const src = useIconImage(image);
   const Icon = getIcon(icon);
   const iconSize = size === "main" ? 30 : 26;
   const labelOffset = size === "main" ? 22 : 18;
   const iconOffset = size === "main" ? -14 : -12;
   return (
     <g className="slice-content" pointerEvents="none">
-      <Icon
-        x={x - iconSize / 2}
-        y={y + iconOffset - iconSize / 2}
-        width={iconSize}
-        height={iconSize}
-        strokeWidth={1.75}
-        className="slice-icon"
-      />
+      {src ? (
+        <image
+          href={src}
+          x={x - iconSize / 2}
+          y={y + iconOffset - iconSize / 2}
+          width={iconSize}
+          height={iconSize}
+          preserveAspectRatio="xMidYMid meet"
+          className="slice-icon-image"
+          data-testid="slice-icon-image"
+        />
+      ) : (
+        <Icon
+          x={x - iconSize / 2}
+          y={y + iconOffset - iconSize / 2}
+          width={iconSize}
+          height={iconSize}
+          strokeWidth={1.75}
+          className="slice-icon"
+        />
+      )}
       <text x={x} y={y + labelOffset} className={`slice-label slice-label--${size}`} textAnchor="middle">
         {label.toUpperCase()}
       </text>

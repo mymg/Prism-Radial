@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { StatsPayload } from "../shared/ipc";
 import type { Config, MenuItem } from "../shared/types";
 import { CenterHub } from "./CenterHub";
@@ -47,7 +48,10 @@ export function RadialCanvas({ items, activeMain, activeSub, openMain, hubHovere
   const holo = theme === "holo";
   const prism = theme === "prism";
   return (
-    <svg className={`radial-canvas theme-${theme}`} viewBox={`0 0 ${LAYOUT.size} ${LAYOUT.size}`} role="menu" aria-label="Menu radial">
+    <svg
+      className={`radial-canvas theme-${theme}`}
+      style={{ "--menu-opacity": appearance.opacity ?? 1 } as CSSProperties}
+      viewBox={`0 0 ${LAYOUT.size} ${LAYOUT.size}`} role="menu" aria-label="Menu radial">
       <defs>
         <radialGradient id="slice-glass" cx={C} cy={C} r={LAYOUT.subOuter} gradientUnits="userSpaceOnUse">
           <stop offset="0.35" stopColor="#0a0f17" />

@@ -36,6 +36,8 @@ export interface MenuItem {
   label: string;
   /** Nome de um ícone registrado em shared/icons.ts */
   icon: string;
+  /** Imagem própria (caminho de um PNG/SVG/ICO/JPG/WebP/GIF). Se não carregar, vale `icon`. */
+  iconImage?: string;
   /** Cor da borda no sub-anel (CSS color). */
   color?: string;
   action?: Action;
@@ -67,6 +69,8 @@ export interface Config {
     accent: string;
     /** Visual do menu. Ausente = "glass". "holo" = HUD holográfico em wireframe. "prism" = cubo de cristal. */
     theme?: Theme;
+    /** Opacidade do fundo do menu (fatias, anel e centro). Ausente = 1. Ícones e textos não mudam. */
+    opacity?: number;
     /** Ajustes do tema Prisma. Ausente = PRISM_DEFAULTS. */
     prism?: PrismConfig;
     showCpu: boolean;
@@ -144,5 +148,11 @@ export const PRISM_LIMITS = {
   glow: [0, 1],
   chroma: [0, 6],
 } as const satisfies Record<string, readonly [number, number]>;
+
+export const OPACITY_LIMITS = { min: 0.2, max: 1 } as const;
+/** Extensões aceitas como imagem própria de um item. */
+export const ICON_IMAGE_EXTENSIONS = ["png", "svg", "ico", "jpg", "jpeg", "webp", "gif", "apng"] as const;
+export const isIconImagePath = (path: string) =>
+  ICON_IMAGE_EXTENSIONS.some((ext) => path.toLowerCase().endsWith(`.${ext}`));
 
 export const LIMITS = { minSlices: 3, maxSlices: 10, maxChildren: 8 } as const;

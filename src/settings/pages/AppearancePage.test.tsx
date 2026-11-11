@@ -78,6 +78,18 @@ describe("Aparência › tema", () => {
     expect(validateConfig(c).some((e) => e.includes("Tema"))).toBe(true);
   });
 
+  it("opacidade do menu: padrão 100%, o controle grava na config e a validação limita a faixa", () => {
+    let last: Config | null = null;
+    render(<Harness onChange={(c) => (last = c)} />);
+    const slider = screen.getByLabelText(/Opacidade do menu: 100%/) as HTMLInputElement;
+    fireEvent.change(slider, { target: { value: "0.6" } });
+    expect(last!.appearance.opacity).toBe(0.6);
+    expect(screen.getByLabelText(/Opacidade do menu: 60%/)).toBeTruthy();
+    expect(validateConfig(last!)).toEqual([]);
+    last!.appearance.opacity = 0.05;
+    expect(validateConfig(last!).some((e) => e.includes("Opacidade do menu"))).toBe(true);
+  });
+
   it("validação rejeita ajustes do Prisma fora da faixa", () => {
     const c = cloneConfig(defaultConfig);
     c.appearance.prism = { ...PRISM_DEFAULTS, size: 3, chroma: -1 };

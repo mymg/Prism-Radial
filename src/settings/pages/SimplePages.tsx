@@ -1,7 +1,7 @@
 import { Check, Clipboard, RotateCcw, Upload } from "lucide-react";
 import { useState } from "react";
 import { cloneConfig, defaultConfig, withDefaults } from "../../shared/defaults";
-import { HOLO_ACCENT, PRISM_ACCENT, PRISM_DEFAULTS, PRISM_LIMITS, wantsHotkey, wantsOrb, type Config, type LauncherMode, type PrismConfig, type Theme } from "../../shared/types";
+import { HOLO_ACCENT, OPACITY_LIMITS, PRISM_ACCENT, PRISM_DEFAULTS, PRISM_LIMITS, wantsHotkey, wantsOrb, type Config, type LauncherMode, type PrismConfig, type Theme } from "../../shared/types";
 import { Field, Section, Segmented, Toggle } from "../controls";
 import { HotkeyRecorder } from "../HotkeyRecorder";
 
@@ -165,6 +165,19 @@ export function AppearancePage({ config, update }: PageProps) {
       {a.theme === "prism" && <PrismSettings prism={{ ...PRISM_DEFAULTS, ...a.prism }} update={update} />}
       <Field label={`Tamanho: ${Math.round(a.scale * 100)}%`}>
         <input type="range" min={0.5} max={1.4} step={0.05} value={a.scale} onChange={(e) => update((c) => void (c.appearance.scale = Number(e.target.value)))} />
+      </Field>
+      <Field
+        label={`Opacidade do menu: ${Math.round((a.opacity ?? 1) * 100)}%`}
+        hint="Deixa o fundo das fatias e do centro translúcido, mostrando a área de trabalho por trás. Ícones e textos continuam nítidos."
+      >
+        <input
+          type="range"
+          min={OPACITY_LIMITS.min}
+          max={OPACITY_LIMITS.max}
+          step={0.05}
+          value={a.opacity ?? 1}
+          onChange={(e) => update((c) => void (c.appearance.opacity = Number(e.target.value)))}
+        />
       </Field>
       <Field label="Cor de destaque (fatia ativa)">
         <div className="color-row">

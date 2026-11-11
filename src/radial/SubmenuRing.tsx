@@ -33,7 +33,7 @@ export function SubmenuRing({ items, parentAngle, activeIndex }: Props) {
           >
             {activeIndex === i && <path d={d} className="slice-halo" />}
             <path d={d} className="slice-shape" />
-            <SliceContent x={mid.x} y={mid.y} icon={item.icon} label={item.label} size="sub" />
+            <SliceContent x={mid.x} y={mid.y} icon={item.icon} image={item.iconImage} label={item.label} size="sub" />
           </g>
         );
       })}

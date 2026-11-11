@@ -25,7 +25,7 @@ export function MainSlice({ item, index, count, active, dimmed }: Props) {
       {/* Halo: traço largo e translúcido sob a borda (substitui filter: drop-shadow, caro). */}
       {active && <path d={d} className="slice-halo" />}
       <path d={d} className="slice-shape" />
-      <SliceContent x={mid.x} y={mid.y} icon={item.icon} label={item.label} size="main" active={active} />
+      <SliceContent x={mid.x} y={mid.y} icon={item.icon} image={item.iconImage} label={item.label} size="main" active={active} />
     </g>
   );
 }

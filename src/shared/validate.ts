@@ -1,5 +1,5 @@
 import { parseCombo } from "./keys";
-import { LAUNCHER_MODES, LIMITS, ORB_LIMITS, PRISM_LIMITS, THEMES, wantsHotkey, type Action, type Config, type MenuItem } from "./types";
+import { LAUNCHER_MODES, LIMITS, OPACITY_LIMITS, ORB_LIMITS, PRISM_LIMITS, THEMES, isIconImagePath, wantsHotkey, type Action, type Config, type MenuItem } from "./types";
 
 /** Valida a configuração inteira. Retorna mensagens legíveis; lista vazia = válida. */
 export function validateConfig(c: Config): string[] {
@@ -22,6 +22,9 @@ export function validateConfig(c: Config): string[] {
   if (c.appearance.scale < 0.5 || c.appearance.scale > 1.6) errors.push("Escala deve estar entre 0,5 e 1,6.");
   if (c.appearance.theme !== undefined && !THEMES.includes(c.appearance.theme))
     errors.push(`Tema desconhecido: "${c.appearance.theme}".`);
+  const opacity = c.appearance.opacity;
+  if (opacity !== undefined && !(opacity >= OPACITY_LIMITS.min && opacity <= OPACITY_LIMITS.max))
+    errors.push("Opacidade do menu deve estar entre 20% e 100%.");
   const prism = c.appearance.prism;
   if (prism) {
     const names: Record<keyof typeof PRISM_LIMITS, string> = {
@@ -51,6 +54,8 @@ export function validateConfig(c: Config): string[] {
 
 function validateItem(it: MenuItem, where: string, allowChildren: boolean, errors: string[]) {
   if (!it.label.trim()) errors.push(`${where}: rótulo vazio.`);
+  if (it.iconImage !== undefined && !isIconImagePath(it.iconImage))
+    errors.push(`${where}: imagem do ícone deve ser PNG, SVG, ICO, JPG, WebP ou GIF.`);
   if (it.dynamic) {
     if (!allowChildren) errors.push(`${where}: submenu automático só em fatias principais.`);
     return;

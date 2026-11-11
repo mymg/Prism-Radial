@@ -1,7 +1,7 @@
 // Ponte com o backend Tauri. No navegador (npm run dev) tudo cai em fallbacks,
 // o que permite desenvolver o visual e a tela de configuração sem Rust.
 import { cloneConfig, defaultConfig, withDefaults } from "./defaults";
-import type { Action, Config } from "./types";
+import { ICON_IMAGE_EXTENSIONS, type Action, type Config } from "./types";
 
 export const isTauri = (): boolean =>
   typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -157,6 +157,20 @@ export async function orbResetPosition(): Promise<void> {
 export async function readOrbImage(path: string): Promise<string> {
   if (!isTauri()) return path;
   return invoke<string>("read_orb_image", { path });
+}
+
+/** Imagem própria de um item do menu como data URL. No navegador, usa o caminho direto. */
+export async function readIconImage(path: string): Promise<string> {
+  if (!isTauri()) return path;
+  return invoke<string>("read_icon_image", { path });
+}
+
+/** Escolhe a imagem de um item do menu. */
+export async function pickIconImage(): Promise<string | null> {
+  if (!isTauri()) return window.prompt("Caminho da imagem (PNG, SVG, ICO, JPG, WebP ou GIF)");
+  const { open } = await import("@tauri-apps/plugin-dialog");
+  const r = await open({ multiple: false, filters: [{ name: "Imagem", extensions: [...ICON_IMAGE_EXTENSIONS] }] });
+  return typeof r === "string" ? r : null;
 }
 
 /** Menu do botão direito no ícone (Configurações / Esconder ícone). */

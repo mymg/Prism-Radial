@@ -253,3 +253,11 @@ input[type="number"]:focus-visible { border-color: var(--active); }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* --- imagem própria de um item --- */
+.item-icon-image { object-fit: contain; flex: none; }
+.icon-image-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.icon-image-current { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line-soft); background: var(--bg-surface); }
+.icon-image-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--text-secondary); }
+.icon-image-row .field-hint { flex-basis: 100%; }
+.field-hint.is-error { color: var(--danger); }

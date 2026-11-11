@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- **Opacidade do menu**: novo controle em Configurações → Aparência (20% a 100%). Deixa o fundo das fatias, do anel e do centro translúcido; ícones, textos e bordas continuam nítidos.
+- **Ícones personalizados**: cada fatia ou subitem pode usar uma imagem própria (PNG, SVG, ICO, JPG, WebP ou GIF, até 2 MB), em Configurações → Itens do menu → "Usar imagem própria".
+  - Se a imagem não carregar (arquivo movido ou apagado), o ícone embutido escolhido é usado no lugar.
+  - As imagens ficam em cache enquanto o app está aberto, então o menu abre sem reler o disco.
+
 ## 0.4.1
 
 - **Correção:** a gravação de um atalho novo ficava esperando e não reconhecia a combinação.

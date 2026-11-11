@@ -156,6 +156,11 @@ impl Config {
         if self.profiles.is_empty() {
             return Err("é necessário ao menos um perfil".into());
         }
+        if let Some(o) = self.appearance.get("opacity").and_then(Value::as_f64) {
+            if !(0.2..=1.0).contains(&o) {
+                return Err("opacidade do menu deve estar entre 20% e 100%".into());
+            }
+        }
         for p in &self.profiles {
             if !(3..=10).contains(&p.items.len()) {
                 return Err(format!("perfil \"{}\": use de 3 a 10 fatias", p.name));

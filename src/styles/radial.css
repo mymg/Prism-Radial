@@ -42,7 +42,9 @@ html.is-tauri body { background: transparent; }
 .orbit-soft { fill: none; stroke: var(--line-soft); stroke-width: 1; }
 .orbit-hot  { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linecap: round; opacity: 0.45; }
 .ambient    { pointer-events: none; }
-.ring-backing { fill: #06090d; fill-opacity: 0.94; }
+/* --menu-opacity (Aparência › Opacidade do menu) vale só para os fundos: ícones, textos e
+   bordas ficam sempre nítidos. */
+.ring-backing { fill: #06090d; fill-opacity: calc(0.94 * var(--menu-opacity, 1)); }
 
 /* --- gradiente ativo --- */
 .stop-hot-deep { stop-color: color-mix(in srgb, var(--active) 6%, #0b1118); }
@@ -55,6 +57,7 @@ html.is-tauri body { background: transparent; }
 
 .main-slice .slice-shape {
   fill: url(#slice-glass);
+  fill-opacity: var(--menu-opacity, 1);
   stroke: var(--line-soft);
   stroke-width: 1;
 }
@@ -98,6 +101,7 @@ html.is-tauri body { background: transparent; }
 
 .sub-slice .slice-shape {
   fill: #0f1726;
+  fill-opacity: var(--menu-opacity, 1);
   stroke: color-mix(in srgb, var(--item-color) 65%, transparent);
   stroke-width: 1.4;
 }
@@ -114,9 +118,10 @@ html.is-tauri body { background: transparent; }
 .submenu-ring.is-dense .slice-label--sub { font-size: 10px; }
 
 /* --- hub central --- */
-.hub-well { fill: #0a0d12; stroke: rgba(255, 255, 255, 0.03); }
+.hub-well { fill: #0a0d12; fill-opacity: var(--menu-opacity, 1); stroke: rgba(255, 255, 255, 0.03); }
 .hub-disc {
   fill: url(#hub-glass);
+  fill-opacity: var(--menu-opacity, 1);
   stroke: var(--line);
   stroke-width: 1;
   transition: stroke var(--dur-mid) var(--ease-out);
@@ -255,7 +260,7 @@ html.is-tauri body { background: transparent; }
 .holo-sweep-edge { stroke: var(--holo-dim); stroke-width: 1.5; }
 
 /* fundo e fatias */
-.theme-holo .ring-backing { fill: var(--holo-bg); fill-opacity: 0.9; }
+.theme-holo .ring-backing { fill: var(--holo-bg); fill-opacity: calc(0.9 * var(--menu-opacity, 1)); }
 .theme-holo .main-slice .slice-shape {
   fill: color-mix(in srgb, var(--active) 4%, transparent);
   stroke: var(--holo-dim);
@@ -274,7 +279,7 @@ html.is-tauri body { background: transparent; }
 
 .theme-holo .sub-slice .slice-shape {
   fill: color-mix(in srgb, var(--item-color) 6%, var(--holo-bg));
-  fill-opacity: 0.92;
+  fill-opacity: calc(0.92 * var(--menu-opacity, 1));
   stroke: color-mix(in srgb, var(--item-color) 55%, transparent);
   stroke-width: 1.2;
 }
@@ -317,7 +322,7 @@ html.is-tauri body { background: transparent; }
 .prism-core-wrap canvas { display: block; }
 .theme-prism .hub-well {
   fill: #060914;
-  fill-opacity: 0.88;
+  fill-opacity: calc(0.88 * var(--menu-opacity, 1));
   stroke: color-mix(in srgb, var(--active) 18%, transparent);
 }
 .theme-prism .center-hub.is-hovered .hub-well { stroke: color-mix(in srgb, var(--active) 45%, transparent); }

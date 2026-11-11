@@ -41,6 +41,14 @@ pub fn orb_clicked(app: AppHandle) -> Result<(), String> {
     crate::orb::clicked(&app)
 }
 
+/// Imagem de um ícone de fatia como data URL.
+#[tauri::command]
+pub async fn read_icon_image(path: String) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || crate::orb::read_icon_image(&path))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 /// Imagem própria do ícone como data URL.
 #[tauri::command]
 pub async fn read_orb_image(path: String) -> Result<String, String> {
