@@ -7,6 +7,7 @@ import { cloneConfig, defaultConfig } from "../../shared/defaults";
 
 const ipc = vi.hoisted(() => ({
   pickIconImage: vi.fn(async (): Promise<string | null> => "C:\\icones\\steam.png"),
+  importIconImage: vi.fn(async (p: string) => `C:\\Users\\u\\AppData\\Roaming\\Prism-Radial\\custom-icons\\${p.split("\\").pop()}`),
   readIconImage: vi.fn(async (p: string) => `data:image/png;base64,${p.length}`),
 }));
 vi.mock("../../shared/ipc", async (orig) => ({ ...(await orig<typeof import("../../shared/ipc")>()), ...ipc }));
@@ -55,7 +56,9 @@ describe("Itens › imagem própria do ícone", () => {
     const { container } = render(<Harness />);
     fireEvent.click(screen.getByRole("button", { name: /Usar imagem própria/ }));
     await flush();
-    expect(latest.items[0].iconImage).toBe("C:\\icones\\steam.png");
+    // O item aponta para a cópia na pasta do app, não para o arquivo original.
+    expect(ipc.importIconImage).toHaveBeenCalledWith("C:\\icones\\steam.png");
+    expect(latest.items[0].iconImage).toBe("C:\\Users\\u\\AppData\\Roaming\\Prism-Radial\\custom-icons\\steam.png");
     expect(latest.items[0].icon).toBe("code"); // ícone embutido fica como reserva
     expect(screen.getByText("steam.png")).toBeTruthy();
     expect(container.querySelectorAll("img.item-icon-image").length).toBeGreaterThanOrEqual(2); // lista + editor
@@ -71,6 +74,15 @@ describe("Itens › imagem própria do ícone", () => {
     await flush();
     expect(latest.items[0].iconImage).toBeUndefined();
     expect(screen.getByText(/Formato não suportado/)).toBeTruthy();
+  });
+
+  it("falha ao copiar mostra o erro e não altera o item", async () => {
+    ipc.importIconImage.mockRejectedValueOnce("imagem muito grande (3.0 MB; máximo 2 MB)");
+    render(<Harness />);
+    fireEvent.click(screen.getByRole("button", { name: /Usar imagem própria/ }));
+    await flush();
+    expect(latest.items[0].iconImage).toBeUndefined();
+    expect(screen.getByText(/Não foi possível copiar a imagem.*muito grande/)).toBeTruthy();
   });
 
   it("cancelar a escolha não muda nada", async () => {

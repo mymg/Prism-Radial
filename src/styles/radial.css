@@ -320,6 +320,26 @@ html.is-tauri body { background: transparent; }
   will-change: transform;
 }
 .prism-core-wrap canvas { display: block; }
+.prism-rings { pointer-events: none; }
+.prism-ring {
+  transform-box: view-box;
+  transform-origin: 450px 450px;
+  animation: prism-ring-spin 120s linear infinite;
+}
+.prism-ring--rev { animation-direction: reverse; }
+@keyframes prism-ring-spin { to { transform: rotate(360deg); } }
+.prism-ring-line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--active) 35%, #ffffff);
+  stroke-linecap: butt;
+  opacity: 0.32;
+}
+.prism-ring-line--red  { stroke: #ff3246; opacity: 0.22; }
+.prism-ring-line--blue { stroke: #2878ff; opacity: 0.22; }
+@media (prefers-reduced-motion: reduce) {
+  .prism-ring { animation: none; }
+}
+
 .theme-prism .hub-well {
   fill: #060914;
   fill-opacity: calc(0.88 * var(--menu-opacity, 1));
@@ -366,6 +386,7 @@ html.is-tauri body { background: transparent; }
 
 /* anéis decorativos (os dois temas) expandem do centro, girando */
 .is-from-orb .holo-back,
+.is-from-orb .prism-rings,
 .is-from-orb .orbit-soft,
 .is-from-orb .orbit-hot {
   transform-box: view-box;
@@ -396,5 +417,5 @@ html.is-tauri body { background: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .radial-root.is-from-orb, .is-from-orb .main-slice, .is-from-orb .ring-backing,
   .is-from-orb .holo-back, .is-from-orb .holo-scan, .is-from-orb .holo-front,
-  .is-from-orb .orbit-soft, .is-from-orb .orbit-hot { animation: none; }
+  .is-from-orb .orbit-soft, .is-from-orb .orbit-hot, .is-from-orb .prism-rings { animation: none; }
 }

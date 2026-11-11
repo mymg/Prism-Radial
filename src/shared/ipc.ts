@@ -165,6 +165,15 @@ export async function readIconImage(path: string): Promise<string> {
   return invoke<string>("read_icon_image", { path });
 }
 
+/**
+ * Copia a imagem escolhida para a pasta de ícones do app (%APPDATA%\Prism-Radial\custom-icons)
+ * e devolve o caminho da cópia. No navegador não há disco: devolve o próprio caminho.
+ */
+export async function importIconImage(path: string): Promise<string> {
+  if (!isTauri()) return path;
+  return invoke<string>("import_icon_image", { path });
+}
+
 /** Escolhe a imagem de um item do menu. */
 export async function pickIconImage(): Promise<string | null> {
   if (!isTauri()) return window.prompt("Caminho da imagem (PNG, SVG, ICO, JPG, WebP ou GIF)");

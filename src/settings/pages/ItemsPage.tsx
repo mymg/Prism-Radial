@@ -2,7 +2,7 @@ import { ChevronDown, ChevronUp, CornerDownRight, ImagePlus, Plus, Sparkles, Tra
 import { useState, type CSSProperties } from "react";
 import { useIconImage } from "../../hooks/useIconImage";
 import { getIcon, ICONS } from "../../shared/icons";
-import { pickIconImage } from "../../shared/ipc";
+import { importIconImage, pickIconImage } from "../../shared/ipc";
 import { LIMITS, isIconImagePath, type MenuItem, type Profile } from "../../shared/types";
 import { ActionEditor, defaultAction } from "../ActionEditor";
 import { Field, Segmented } from "../controls";
@@ -42,7 +42,12 @@ function IconImagePicker({ item, onChange }: { item: MenuItem; onChange: (path: 
     if (!path) return;
     if (!isIconImagePath(path)) return void setError("Formato não suportado. Use PNG, SVG, ICO, JPG, WebP ou GIF.");
     setError(null);
-    onChange(path);
+    try {
+      // O app guarda uma cópia: o arquivo original pode ser movido ou apagado depois.
+      onChange(await importIconImage(path));
+    } catch (e) {
+      setError(`Não foi possível copiar a imagem: ${String(e)}`);
+    }
   };
   return (
     <div className="icon-image-row">
@@ -63,6 +68,9 @@ function IconImagePicker({ item, onChange }: { item: MenuItem; onChange: (path: 
       {error && <span className="field-hint is-error">{error}</span>}
       {item.iconImage && !src && !error && (
         <span className="field-hint">Se a imagem não carregar, o ícone escolhido acima é usado.</span>
+      )}
+      {!item.iconImage && !error && (
+        <span className="field-hint">A imagem é copiada para a pasta do app (custom-icons).</span>
       )}
     </div>
   );

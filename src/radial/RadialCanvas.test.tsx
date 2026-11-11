@@ -1,6 +1,8 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { defaultConfig, defaultProfile } from "../shared/defaults";
+import { LAYOUT } from "./geometry";
+import { PRISM_RINGS } from "./PrismRings";
 import { RadialCanvas } from "./RadialCanvas";
 
 const base = {
@@ -53,6 +55,30 @@ describe("RadialCanvas", () => {
     expect(screen.queryByText("85%")).toBeNull();
     expect(svg.querySelector(".hub-disc")).toBeNull();
     expect(svg.querySelector(".hub-well")).toBeTruthy();
+  });
+
+  it("tema Prisma troca os arcos fixos por anéis que giram em sentidos alternados", () => {
+    const { container } = render(
+      <RadialCanvas {...base} appearance={defaultConfig.appearance} activeMain={null} activeSub={null} />,
+    );
+    const rings = [...container.querySelectorAll(".prism-ring")];
+    expect(rings).toHaveLength(PRISM_RINGS.length);
+    expect(rings.map((r) => r.classList.contains("prism-ring--rev"))).toEqual([false, true, false]);
+    expect(screen.getByTestId("prism-rings").getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelector(".orbit-hot")).toBeNull();
+    for (const ring of PRISM_RINGS) {
+      // Cabe na janela (metade do canvas) e fica além do sub-anel; o padrão fecha a volta.
+      expect(ring.r + ring.width).toBeLessThan(LAYOUT.size / 2);
+      expect(ring.r).toBeGreaterThan(LAYOUT.subOuter);
+      expect(ring.pattern.reduce((a, b) => a + b, 0)).toBe(360);
+      expect(ring.pattern.length % 2).toBe(0);
+    }
+  });
+
+  it("tema vidro mantém os arcos fixos, sem anéis", () => {
+    const { container } = render(<RadialCanvas {...base} activeMain={null} activeSub={null} />);
+    expect(container.querySelector(".prism-rings")).toBeNull();
+    expect(container.querySelectorAll(".orbit-hot").length).toBeGreaterThan(0);
   });
 
   it("tema holográfico desenha esfera, varredura e retícula sem perder fatias e hub", () => {

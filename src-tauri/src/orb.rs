@@ -228,6 +228,57 @@ pub fn read_icon_image(path: &str) -> Result<String, String> {
     read_data_url(path, mime, MAX_ICON_BYTES)
 }
 
+/// Pasta das imagens próprias dos itens: `%APPDATA%\Prism-Radial\custom-icons`.
+pub fn custom_icons_dir() -> std::path::PathBuf {
+    crate::config::config_dir().join("custom-icons")
+}
+
+/// Copia a imagem escolhida para `dir` e devolve o caminho da cópia. O menu passa a usar a
+/// cópia, então o arquivo original pode ser movido ou apagado.
+///
+/// O nome é `<nome original>-<hash do conteúdo>.<ext>`: importar o mesmo arquivo de novo
+/// reaproveita a cópia, e arquivos diferentes com o mesmo nome não se sobrescrevem.
+pub fn import_icon_image(path: &str, dir: &std::path::Path) -> Result<String, String> {
+    use std::hash::{Hash, Hasher};
+    use std::path::Path;
+
+    icon_mime(path).ok_or("formato não suportado (use PNG, SVG, ICO, JPG, WebP ou GIF)")?;
+    let src = Path::new(path);
+    let meta = std::fs::metadata(src).map_err(|e| format!("não foi possível abrir a imagem: {e}"))?;
+    if !meta.is_file() {
+        return Err("o caminho não é um arquivo".into());
+    }
+    if meta.len() > MAX_ICON_BYTES {
+        return Err(format!(
+            "imagem muito grande ({:.1} MB; máximo {} MB)",
+            meta.len() as f64 / 1_048_576.0,
+            MAX_ICON_BYTES / 1_048_576
+        ));
+    }
+    // Já está na pasta (ex.: escolhida de dentro dela): não duplica.
+    if src.parent().is_some_and(|p| p == dir) {
+        return Ok(path.to_string());
+    }
+    let bytes = std::fs::read(src).map_err(|e| e.to_string())?;
+    let mut hasher = std::collections::hash_map::DefaultHasher::new();
+    bytes.hash(&mut hasher);
+    let stem: String = src
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("icone")
+        .chars()
+        .map(|c| if c.is_alphanumeric() || c == '-' || c == '_' { c } else { '-' })
+        .take(40)
+        .collect();
+    let ext = src.extension().and_then(|e| e.to_str()).unwrap_or("png").to_ascii_lowercase();
+    let dest = dir.join(format!("{stem}-{:08x}.{ext}", hasher.finish() as u32));
+    std::fs::create_dir_all(dir).map_err(|e| format!("não foi possível criar a pasta de ícones: {e}"))?;
+    if !dest.exists() {
+        std::fs::write(&dest, &bytes).map_err(|e| format!("não foi possível copiar a imagem: {e}"))?;
+    }
+    Ok(dest.to_string_lossy().into_owned())
+}
+
 fn read_data_url(path: &str, mime: &str, max_bytes: u64) -> Result<String, String> {
     let meta = std::fs::metadata(path).map_err(|e| format!("não foi possível abrir a imagem: {e}"))?;
     if !meta.is_file() {
@@ -375,6 +426,48 @@ mod image_tests {
         let big = dir.join("big.png");
         std::fs::File::create(&big).unwrap().set_len(MAX_ICON_BYTES + 1).unwrap();
         assert!(read_icon_image(big.to_str().unwrap()).unwrap_err().contains("máximo 2 MB"));
+    }
+
+    #[test]
+    fn importa_imagem_para_a_pasta_de_icones() {
+        let base = std::env::temp_dir().join("prism-import-test");
+        let _ = std::fs::remove_dir_all(&base);
+        let origem = base.join("origem");
+        let outra = base.join("outra");
+        let dest = base.join("custom-icons");
+        std::fs::create_dir_all(&origem).unwrap();
+        std::fs::create_dir_all(&outra).unwrap();
+        let a = origem.join("meu icone.PNG");
+        std::fs::write(&a, b"aaa").unwrap();
+
+        // Copia para a pasta (criando-a), com nome seguro e extensão minúscula.
+        let copia = import_icon_image(a.to_str().unwrap(), &dest).unwrap();
+        let copia_path = std::path::Path::new(&copia);
+        assert_eq!(copia_path.parent().unwrap(), dest);
+        let nome = copia_path.file_name().unwrap().to_str().unwrap();
+        assert!(nome.starts_with("meu-icone-") && nome.ends_with(".png"), "{nome}");
+        assert_eq!(std::fs::read(copia_path).unwrap(), b"aaa");
+
+        // A cópia sobrevive à remoção do original e é lida normalmente.
+        std::fs::remove_file(&a).unwrap();
+        assert!(read_icon_image(&copia).unwrap().starts_with("data:image/png;base64,"));
+
+        // Mesmo conteúdo → mesma cópia; mesmo nome com outro conteúdo → outra cópia.
+        std::fs::write(&a, b"aaa").unwrap();
+        assert_eq!(import_icon_image(a.to_str().unwrap(), &dest).unwrap(), copia);
+        let b = outra.join("meu icone.png");
+        std::fs::write(&b, b"bbb").unwrap();
+        let copia_b = import_icon_image(b.to_str().unwrap(), &dest).unwrap();
+        assert_ne!(copia_b, copia);
+        assert_eq!(std::fs::read_dir(&dest).unwrap().count(), 2);
+
+        // Arquivo que já está na pasta não é duplicado.
+        assert_eq!(import_icon_image(&copia, &dest).unwrap(), copia);
+        assert_eq!(std::fs::read_dir(&dest).unwrap().count(), 2);
+
+        // Formato inválido e arquivo inexistente são recusados sem criar nada.
+        assert!(import_icon_image("nada.exe", &dest).is_err());
+        assert!(import_icon_image(origem.join("sumiu.png").to_str().unwrap(), &dest).is_err());
     }
 
     #[test]

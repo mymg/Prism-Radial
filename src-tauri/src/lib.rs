@@ -98,6 +98,7 @@ pub fn run() {
             commands::orb_reset_position,
             commands::read_orb_image,
             commands::read_icon_image,
+            commands::import_icon_image,
             commands::orb_context_menu,
             perf::perf_log,
             keycapture::start_key_capture,

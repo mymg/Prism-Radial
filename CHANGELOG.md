@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0
+
+- **Ícones personalizados agora são copiados**: ao escolher uma imagem, o app guarda uma cópia em `%APPDATA%\Prism-Radial\custom-icons` e usa essa cópia. O arquivo original pode ser movido ou apagado.
+  - Escolher a mesma imagem de novo reaproveita a cópia; imagens diferentes com o mesmo nome não se sobrescrevem.
+  - Ícones escolhidos na 0.5.0 continuam apontando para o arquivo original; escolha a imagem de novo para criar a cópia.
+- **Tema Prisma: anéis giratórios**: três círculos de segmentos em volta do menu, girando devagar em sentidos alternados. Param quando o Windows está com "reduzir animações".
+
 ## 0.5.0
 
 - **Opacidade do menu**: novo controle em Configurações → Aparência (20% a 100%). Deixa o fundo das fatias, do anel e do centro translúcido; ícones, textos e bordas continuam nítidos.

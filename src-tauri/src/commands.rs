@@ -49,6 +49,16 @@ pub async fn read_icon_image(path: String) -> Result<String, String> {
         .map_err(|e| e.to_string())?
 }
 
+/// Copia a imagem escolhida para a pasta `custom-icons` e devolve o caminho da cópia.
+#[tauri::command]
+pub async fn import_icon_image(path: String) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        crate::orb::import_icon_image(&path, &crate::orb::custom_icons_dir())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 /// Imagem própria do ícone como data URL.
 #[tauri::command]
 pub async fn read_orb_image(path: String) -> Result<String, String> {

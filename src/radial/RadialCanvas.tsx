@@ -6,6 +6,7 @@ import { HoloBack, HoloFront, HoloScan } from "./HoloLayer";
 import { LAYOUT, polar, sliceAngle } from "./geometry";
 import { MainSlice } from "./MainSlice";
 import { PrismCore } from "./PrismCore";
+import { PrismRings } from "./PrismRings";
 import { SubmenuRing } from "./SubmenuRing";
 
 export interface RadialCanvasProps {
@@ -85,11 +86,17 @@ export function RadialCanvas({ items, activeMain, activeSub, openMain, hubHovere
           <circle cx={C + 250} cy={C - 250} r={170} fill="url(#glow-teal)" className="ambient" />
           <circle cx={C - 280} cy={C + 250} r={150} fill="url(#glow-violet)" className="ambient" />
 
-          {/* órbitas */}
-          <circle cx={C} cy={C} r={LAYOUT.subOuter + 10} className="orbit-soft" />
-          {ORBIT_ARCS.map(([r, a0, a1], i) => (
-            <path key={i} d={orbitArc(r, a0, a1)} className="orbit-hot" />
-          ))}
+          {/* órbitas: no Prisma, anéis de segmentos girando; no Vidro, arcos fixos */}
+          {prism ? (
+            <PrismRings />
+          ) : (
+            <>
+              <circle cx={C} cy={C} r={LAYOUT.subOuter + 10} className="orbit-soft" />
+              {ORBIT_ARCS.map(([r, a0, a1], i) => (
+                <path key={i} d={orbitArc(r, a0, a1)} className="orbit-hot" />
+              ))}
+            </>
+          )}
         </>
       )}
 
