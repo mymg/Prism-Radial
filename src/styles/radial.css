@@ -117,6 +117,44 @@ html.is-tauri body { background: transparent; }
 
 .submenu-ring.is-dense .slice-label--sub { font-size: 10px; }
 
+/* --- submenu em barra compacta (só ícones, na largura da fatia-pai) --- */
+.compact-band {
+  fill: #0a101b;
+  fill-opacity: calc(0.92 * var(--menu-opacity, 1));
+  stroke: var(--line-soft);
+  stroke-width: 1;
+  animation: compact-in var(--dur-slow) var(--ease-out) both;
+  transform-box: view-box;
+  transform-origin: 450px 450px;
+}
+@keyframes compact-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+/* Especificidade maior que .theme-holo .sub-slice .slice-shape: as células são transparentes
+   sobre a faixa em qualquer tema. */
+.radial-canvas .submenu-compact .compact-cell .slice-shape {
+  fill: transparent;
+  stroke: transparent;
+}
+.compact-cell .slice-icon { color: var(--text-secondary); }
+.radial-canvas .submenu-compact .compact-cell.is-active .slice-shape {
+  fill: color-mix(in srgb, var(--item-color) 16%, transparent);
+  stroke: var(--item-color);
+  stroke-width: 1.4;
+}
+.compact-cell.is-active .slice-icon { color: var(--item-color); }
+.compact-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  fill: var(--item-color);
+  pointer-events: none;
+}
+.theme-holo .compact-band { fill: var(--holo-bg); stroke: var(--holo-dim); }
+.theme-holo .compact-label { font-family: var(--font-holo); }
+
 /* --- hub central --- */
 .hub-well { fill: #0a0d12; fill-opacity: var(--menu-opacity, 1); stroke: rgba(255, 255, 255, 0.03); }
 .hub-disc {
@@ -337,7 +375,7 @@ html.is-tauri body { background: transparent; }
 .prism-ring-line--red  { stroke: #ff3246; opacity: 0.22; }
 .prism-ring-line--blue { stroke: #2878ff; opacity: 0.22; }
 @media (prefers-reduced-motion: reduce) {
-  .prism-ring { animation: none; }
+  .prism-ring, .compact-band { animation: none; }
 }
 
 .theme-prism .hub-well {

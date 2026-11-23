@@ -123,6 +123,8 @@ export function RadialCanvas({ items, activeMain, activeSub, openMain, hubHovere
           items={children}
           parentAngle={sliceAngle(subParent!, items.length)}
           activeIndex={activeSub}
+          compact={parentItem!.submenuStyle === "compact"}
+          mainCount={items.length}
         />
       )}
 

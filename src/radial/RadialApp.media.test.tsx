@@ -1,8 +1,8 @@
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cloneConfig, defaultConfig } from "../shared/defaults";
-import type { Config } from "../shared/types";
-import { LAYOUT, polar, sliceAngle, submenuAngles } from "./geometry";
+import type { Config, SubmenuStyle } from "../shared/types";
+import { COMPACT, LAYOUT, compactAngles, polar, sliceAngle, submenuAngles } from "./geometry";
 
 // Teste adicionado pelo QA: ações de mídia não fecham o menu (no Tauri) — cliques repetidos executam
 // de novo, a seleção permanece e aparece um toast com o rótulo da mídia. Demais ações não mostram toast.
@@ -40,7 +40,15 @@ vi.mock("../shared/perf", () => ({
 
 import { RadialApp } from "./RadialApp";
 
-const cfg = () => cloneConfig(defaultConfig);
+// Formato do submenu da Mídia em teste (o padrão é "compact"; cada caso roda nos dois).
+let mediaStyle: SubmenuStyle = "compact";
+const cfg = () => {
+  const c = cloneConfig(defaultConfig);
+  const m = c.profiles[0].items.find((i) => i.id === "midia")!;
+  if (mediaStyle === "compact") m.submenuStyle = "compact";
+  else delete m.submenuStyle;
+  return c;
+};
 const items = () => cfg().profiles[0].items;
 const idx = (id: string) => items().findIndex((i) => i.id === id);
 const n = () => items().length;
@@ -53,8 +61,12 @@ function mainPoint(i: number) {
 }
 function subPoint(parent: number, k: number) {
   const count = items()[parent].children!.length;
-  const a = submenuAngles(sliceAngle(parent, n()), count)[k];
-  const p = polar(0, 0, ((LAYOUT.subInner + LAYOUT.subOuter) / 2) * scale(), a);
+  const compact = items()[parent].submenuStyle === "compact";
+  const a = compact
+    ? compactAngles(sliceAngle(parent, n()), count, n())[k]
+    : submenuAngles(sliceAngle(parent, n()), count)[k];
+  const r = compact ? (COMPACT.inner + COMPACT.outer) / 2 : (LAYOUT.subInner + LAYOUT.subOuter) / 2;
+  const p = polar(0, 0, r * scale(), a);
   return { x: center().x + p.x, y: center().y + p.y };
 }
 function ptr(type: "pointermove" | "pointerup", pt: { x: number; y: number }) {
@@ -94,7 +106,11 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-describe("RadialApp › mídia mantém o menu aberto (Tauri)", () => {
+describe.each(["compact", "ring"] as const)("RadialApp › mídia mantém o menu aberto (Tauri, submenu %s)", (style) => {
+  beforeEach(() => {
+    mediaStyle = style;
+  });
+
   it("clique em volume + executa, mantém menu/sub-anel/seleção e mostra toast; segundo clique executa de novo", async () => {
     await mountAndShow();
     const midia = idx("midia");
@@ -142,5 +158,32 @@ describe("RadialApp › mídia mantém o menu aberto (Tauri)", () => {
     await click(mainPoint(idx("browser")));
     expect(ipc.runAction).toHaveBeenCalledWith(items()[idx("browser")].action);
     expect(toast()).toBeNull();
+  });
+});
+
+describe("RadialApp › barra compacta", () => {
+  beforeEach(() => {
+    mediaStyle = "compact";
+  });
+
+  it("abre como barra só com ícones; cada botão escolhe o próprio item e o nome aparece embaixo", async () => {
+    await mountAndShow();
+    const midia = idx("midia");
+    await click(mainPoint(midia));
+    expect(submenu()!.getAttribute("data-compact")).toBe("true");
+    expect(document.querySelectorAll(".compact-cell")).toHaveLength(items()[midia].children!.length);
+    expect(document.querySelectorAll(".submenu-compact .slice-label")).toHaveLength(0);
+    for (const [k, child] of items()[midia].children!.entries()) {
+      ptr("pointermove", subPoint(midia, k));
+      expect(activeSubLabel()).toBe(child.label);
+      expect(document.querySelector(".compact-label")!.textContent).toBe(child.label.toUpperCase());
+    }
+  });
+
+  it("a barra cabe na largura da fatia de Mídia", () => {
+    const count = items()[idx("midia")].children!.length;
+    const angles = compactAngles(0, count, n());
+    const spanEach = angles.length > 1 ? angles[1] - angles[0] : 0;
+    expect(spanEach * count).toBeLessThanOrEqual(360 / n());
   });
 });

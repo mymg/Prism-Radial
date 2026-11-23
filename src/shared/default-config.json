@@ -195,6 +195,7 @@
           "id": "midia",
           "label": "Mídia",
           "icon": "music",
+          "submenuStyle": "compact",
           "children": [
             {
               "id": "prev",

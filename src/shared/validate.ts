@@ -1,5 +1,5 @@
 import { parseCombo } from "./keys";
-import { LAUNCHER_MODES, LIMITS, OPACITY_LIMITS, ORB_LIMITS, PRISM_LIMITS, THEMES, isIconImagePath, wantsHotkey, type Action, type Config, type MenuItem } from "./types";
+import { LAUNCHER_MODES, LIMITS, SUBMENU_STYLES, OPACITY_LIMITS, ORB_LIMITS, PRISM_LIMITS, THEMES, isIconImagePath, wantsHotkey, type Action, type Config, type MenuItem } from "./types";
 
 /** Valida a configuração inteira. Retorna mensagens legíveis; lista vazia = válida. */
 export function validateConfig(c: Config): string[] {
@@ -54,6 +54,8 @@ export function validateConfig(c: Config): string[] {
 
 function validateItem(it: MenuItem, where: string, allowChildren: boolean, errors: string[]) {
   if (!it.label.trim()) errors.push(`${where}: rótulo vazio.`);
+  if (it.submenuStyle !== undefined && !SUBMENU_STYLES.includes(it.submenuStyle))
+    errors.push(`${where}: formato de submenu desconhecido: "${it.submenuStyle}".`);
   if (it.iconImage !== undefined && !isIconImagePath(it.iconImage))
     errors.push(`${where}: imagem do ícone deve ser PNG, SVG, ICO, JPG, WebP ou GIF.`);
   if (it.dynamic) {

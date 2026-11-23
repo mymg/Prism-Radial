@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0
+
+- **Arrastar para reordenar**: em Configurações → Itens do menu, cada fatia e subitem tem uma alça (⋮⋮) para arrastar até a nova posição. Uma linha mostra onde o item vai entrar; Esc cancela. Subitens só se movem dentro da própria fatia. Alt+↑/↓ também move o item selecionado. (Mesma abordagem do Kira Radial.)
+- **Submenu em barra compacta**: nova opção "Formato do submenu" nas fatias com submenu.
+  - "Barra compacta" mostra os subitens como botões só com ícone, numa faixa logo abaixo da fatia, na largura dela. O nome do item aparece ao apontar.
+  - Os botões seguem a ordem de leitura: da esquerda para a direita em cima e embaixo, de cima para baixo nas laterais.
+  - A fatia Mídia da configuração padrão já vem assim. Em uma configuração existente, escolha a opção na fatia Mídia.
+
 ## 0.6.0
 
 - **Ícones personalizados agora são copiados**: ao escolher uma imagem, o app guarda uma cópia em `%APPDATA%\Prism-Radial\custom-icons` e usa essa cópia. O arquivo original pode ser movido ou apagado.

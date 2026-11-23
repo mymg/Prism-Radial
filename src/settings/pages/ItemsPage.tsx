@@ -1,9 +1,9 @@
-import { ChevronDown, ChevronUp, CornerDownRight, ImagePlus, Plus, Sparkles, Trash2, X } from "lucide-react";
-import { useState, type CSSProperties } from "react";
+import { ChevronDown, ChevronUp, CornerDownRight, GripVertical, ImagePlus, Plus, Sparkles, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useIconImage } from "../../hooks/useIconImage";
 import { getIcon, ICONS } from "../../shared/icons";
 import { importIconImage, pickIconImage } from "../../shared/ipc";
-import { LIMITS, isIconImagePath, type MenuItem, type Profile } from "../../shared/types";
+import { LIMITS, isIconImagePath, type MenuItem, type Profile, type SubmenuStyle } from "../../shared/types";
 import { ActionEditor, defaultAction } from "../ActionEditor";
 import { Field, Segmented } from "../controls";
 
@@ -124,14 +124,59 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
     onSelect(ci === null ? { main: Math.max(0, mi - 1), child: null } : { main: mi, child: null });
   };
 
-  const reorder = (mi: number, ci: number | null, d: number) => {
-    edit((p) => (ci === null ? move(p.items, mi, mi + d) : move(p.items[mi].children!, ci, ci + d)));
-    if (ci === null) onSelect({ main: Math.min(Math.max(mi + d, 0), items.length - 1), child: null });
-    else onSelect({ main: mi, child: Math.min(Math.max(ci + d, 0), items[mi].children!.length - 1) });
+  /** Move a fatia `mi` (ou o subitem `ci` dela) para a posição `to` do mesmo grupo e o mantém selecionado. */
+  const moveTo = (mi: number, ci: number | null, to: number) => {
+    const len = ci === null ? items.length : items[mi].children!.length;
+    const from = ci ?? mi;
+    if (to < 0 || to >= len || to === from) return;
+    edit((p) => (ci === null ? move(p.items, mi, to) : move(p.items[mi].children!, ci, to)));
+    onSelect(ci === null ? { main: to, child: null } : { main: mi, child: to });
+  };
+  const reorder = (mi: number, ci: number | null, d: number) => moveTo(mi, ci, (ci ?? mi) + d);
+
+  // --- Arrastar pela alça. Usa eventos de ponteiro: a API de drag do HTML5 é ruim no WebView2.
+  // (Mesma abordagem do Kira Radial, de Hideki515.)
+  type Drag = { mi: number; ci: number | null; over: number | null };
+  const [drag, setDrag] = useState<Drag | null>(null);
+  const dragRef = useRef<Drag | null>(null);
+  dragRef.current = drag;
+  useEffect(() => {
+    if (!drag) return;
+    const up = () => {
+      const d = dragRef.current;
+      setDrag(null);
+      if (d && d.over !== null) moveTo(d.mi, d.ci, d.over);
+    };
+    const cancel = (e: KeyboardEvent) => e.key === "Escape" && setDrag(null);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("keydown", cancel);
+    return () => {
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("keydown", cancel);
+    };
+  });
+  /** Fatias só trocam de lugar com fatias; subitens, só dentro da própria fatia. */
+  const sameGroup = (d: Drag, mi: number, ci: number | null) => (d.ci === null ? ci === null : ci !== null && mi === d.mi);
+  const hover = (mi: number, ci: number | null) => {
+    const d = dragRef.current;
+    if (d && sameGroup(d, mi, ci)) setDrag({ ...d, over: ci ?? mi });
+  };
+  const rowDragClass = (mi: number, ci: number | null) => {
+    if (!drag) return "";
+    if (drag.mi === mi && drag.ci === ci) return " is-dragging";
+    if (!sameGroup(drag, mi, ci) || drag.over !== (ci ?? mi)) return "";
+    // A linha de inserção aparece do lado para onde o item vai: acima ao subir, abaixo ao descer.
+    return (ci ?? mi) < (drag.ci ?? drag.mi) ? " is-drop-before" : " is-drop-after";
+  };
+  /** Alt+↑/↓ na linha move o item (alternativa de teclado ao arrastar). */
+  const onRowKey = (mi: number, ci: number | null) => (e: ReactKeyboardEvent) => {
+    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+    e.preventDefault();
+    reorder(mi, ci, e.key === "ArrowUp" ? -1 : 1);
   };
 
   return (
-    <div className="items-page">
+    <div className={`items-page${drag ? " is-dragging-item" : ""}`}>
       <div className="item-tree">
         <div className="tree-head">
           <span>Fatias ({items.length}/{LIMITS.maxSlices})</span>
@@ -144,7 +189,15 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
             const isSel = selection.main === mi && selection.child === null;
             return (
               <li key={it.id}>
-                <div className={`tree-row${isSel ? " is-selected" : ""}`} onClick={() => onSelect({ main: mi, child: null })}>
+                <div
+                  className={`tree-row${isSel ? " is-selected" : ""}${rowDragClass(mi, null)}`}
+                  onClick={() => onSelect({ main: mi, child: null })}
+                  onPointerOver={() => hover(mi, null)}
+                  onKeyDown={onRowKey(mi, null)}
+                  tabIndex={0}
+                  data-testid={`row-${mi}`}
+                >
+                  <DragHandle onStart={() => setDrag({ mi, ci: null, over: null })} />
                   <ItemIcon item={it} size={16} />
                   <span className="tree-label">{it.label || "(sem nome)"}</span>
                   {it.dynamic ? (
@@ -165,10 +218,15 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
                       return (
                         <li key={ch.id}>
                           <div
-                            className={`tree-row is-child${sel ? " is-selected" : ""}`}
+                            className={`tree-row is-child${sel ? " is-selected" : ""}${rowDragClass(mi, ci)}`}
                             style={{ "--item-color": ch.color ?? "var(--accent)" } as CSSProperties}
                             onClick={() => onSelect({ main: mi, child: ci })}
+                            onPointerOver={() => hover(mi, ci)}
+                            onKeyDown={onRowKey(mi, ci)}
+                            tabIndex={0}
+                            data-testid={`row-${mi}-${ci}`}
                           >
+                            <DragHandle onStart={() => setDrag({ mi, ci, over: null })} />
                             <CornerDownRight size={13} className="tree-elbow" />
                             <ItemIcon item={ch} size={15} />
                             <span className="tree-label">{ch.label || "(sem nome)"}</span>
@@ -262,6 +320,31 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
                     if (v === "submenu") it.children = [];
                     else if (v === "audio") it.dynamic = "audioOutputs";
                     else it.action = defaultAction("launch");
+                    if (v !== "submenu") delete it.submenuStyle;
+                  })
+                }
+              />
+            </Field>
+          )}
+
+          {selection.child === null && selected.children && !selected.dynamic && (
+            <Field
+              label="Formato do submenu"
+              group
+              hint={selected.submenuStyle === "compact"
+                ? "Os subitens viram botões só com ícone, numa faixa logo abaixo da fatia. Bom para mídia e ações rápidas; o nome aparece ao apontar."
+                : "Os subitens abrem num anel em volta do menu, com ícone e nome."}
+            >
+              <Segmented<SubmenuStyle>
+                value={selected.submenuStyle ?? "ring"}
+                options={[
+                  { value: "ring", label: "Anel" },
+                  { value: "compact", label: "Barra compacta" },
+                ]}
+                onChange={(v) =>
+                  editSelected((it) => {
+                    if (v === "compact") it.submenuStyle = "compact";
+                    else delete it.submenuStyle;
                   })
                 }
               />
@@ -286,6 +369,27 @@ export function ItemsPage({ profile, selection, onSelect, edit }: Props) {
         </div>
       )}
     </div>
+  );
+}
+
+/** Alça de arrastar: inicia o arrasto; o destino é a linha sob o ponteiro. */
+function DragHandle({ onStart }: { onStart: () => void }) {
+  return (
+    <span
+      className="drag-handle"
+      title="Arraste para reordenar (ou Alt+↑/↓)"
+      aria-label="Arrastar para reordenar"
+      role="button"
+      onPointerDown={(e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+        onStart();
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <GripVertical size={14} />
+    </span>
   );
 }
 

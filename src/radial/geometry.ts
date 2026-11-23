@@ -99,6 +99,45 @@ export function submenuItemSpan(count: number, span = LAYOUT.subSpan): number {
   return Math.min(span, 320 / Math.max(count, 1));
 }
 
+/**
+ * Submenu "barra compacta": botões só com ícone numa faixa fina logo além da fatia-pai,
+ * ocupando mais ou menos a largura dela (ex.: controles de mídia lado a lado).
+ */
+export const COMPACT = {
+  inner: LAYOUT.subInner,
+  outer: LAYOUT.subInner + 48,
+  /** Fração da largura da fatia-pai ocupada pela barra. */
+  fill: 0.94,
+  /** Largura mínima de cada botão, em graus (fatias estreitas deixam a barra mais larga que a fatia). */
+  minItemSpan: 7,
+  gap: 4,
+} as const;
+
+export function compactItemSpan(count: number, mainCount: number): number {
+  const n = Math.max(count, 1);
+  return Math.min(320 / n, Math.max(COMPACT.minItemSpan, (sliceSpan(mainCount) * COMPACT.fill) / n));
+}
+
+/**
+ * Sentido horário lê ao contrário embaixo (direita → esquerda) e na lateral esquerda
+ * (de baixo para cima). Nesses lados a barra é invertida para ler da esquerda para a
+ * direita e de cima para baixo.
+ */
+export function compactReadsReversed(parentAngle: number): boolean {
+  const a = parentAngle * DEG;
+  const sin = Math.sin(a);
+  const cos = Math.cos(a);
+  return Math.abs(sin) > Math.abs(cos) ? sin > 0 : cos < 0;
+}
+
+/** Ângulos dos botões da barra, na ordem dos itens (o 1º item fica no início da leitura). */
+export function compactAngles(parentAngle: number, count: number, mainCount: number): number[] {
+  const s = compactItemSpan(count, mainCount);
+  const start = parentAngle - (count * s) / 2;
+  const angles = Array.from({ length: count }, (_, i) => start + (i + 0.5) * s);
+  return compactReadsReversed(parentAngle) ? angles.reverse() : angles;
+}
+
 export type Hit =
   | { ring: "center" }
   | { ring: "main"; index: number }
@@ -107,6 +146,8 @@ export type Hit =
 export interface SubmenuState {
   parentAngle: number;
   count: number;
+  /** Barra compacta (precisa de mainCount para saber a largura da fatia-pai). */
+  compact?: boolean;
 }
 
 /**
@@ -123,8 +164,10 @@ export function hitTest(
   const angle = Math.atan2(dy, dx) / DEG;
 
   if (sub && sub.count > 0 && r >= layout.subInner - 4) {
-    const span = submenuItemSpan(sub.count, layout.subSpan);
-    const centers = submenuAngles(sub.parentAngle, sub.count, layout.subSpan);
+    const span = sub.compact ? compactItemSpan(sub.count, mainCount) : submenuItemSpan(sub.count, layout.subSpan);
+    const centers = sub.compact
+      ? compactAngles(sub.parentAngle, sub.count, mainCount)
+      : submenuAngles(sub.parentAngle, sub.count, layout.subSpan);
     for (let i = 0; i < centers.length; i++) {
       if (Math.abs(angleDiff(centers[i], angle)) <= span / 2) return { ring: "sub", index: i };
     }

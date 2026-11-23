@@ -63,3 +63,16 @@ describe("validateAction › audioOutput", () => {
     expect(validateAction({ type: "audioOutput", mode: "set", deviceName: "Headset" })).toBeNull();
   });
 });
+
+describe("formato do submenu", () => {
+  it("aceita anel e barra compacta; recusa valor desconhecido", () => {
+    const c = cloneConfig(defaultConfig);
+    const m = c.profiles[0].items.find((i) => i.id === "midia")!;
+    expect(m.submenuStyle).toBe("compact");
+    expect(validateConfig(c)).toEqual([]);
+    m.submenuStyle = "ring";
+    expect(validateConfig(c)).toEqual([]);
+    (m as { submenuStyle: string }).submenuStyle = "grade";
+    expect(validateConfig(c).some((e) => e.includes("formato de submenu"))).toBe(true);
+  });
+});

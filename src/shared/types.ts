@@ -42,6 +42,8 @@ export interface MenuItem {
   color?: string;
   action?: Action;
   children?: MenuItem[];
+  /** Formato do submenu: anel com rótulos (padrão) ou barra compacta só com ícones. */
+  submenuStyle?: SubmenuStyle;
   /** Submenu gerado na hora (ignora children/action). "audioOutputs" = saídas de áudio detectadas. */
   dynamic?: "audioOutputs";
 }
@@ -148,6 +150,9 @@ export const PRISM_LIMITS = {
   glow: [0, 1],
   chroma: [0, 6],
 } as const satisfies Record<string, readonly [number, number]>;
+
+export type SubmenuStyle = "ring" | "compact";
+export const SUBMENU_STYLES: readonly SubmenuStyle[] = ["ring", "compact"];
 
 export const OPACITY_LIMITS = { min: 0.2, max: 1 } as const;
 /** Extensões aceitas como imagem própria de um item. */

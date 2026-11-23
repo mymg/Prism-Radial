@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  LAYOUT, angleDiff, donutSlicePath, hitTest, normalizeAngle, polar, sliceAngle, submenuAngles,
-} from "./geometry";
+import { angleDiff, COMPACT, compactAngles, compactItemSpan, compactReadsReversed, donutSlicePath, hitTest, LAYOUT, normalizeAngle, polar, sliceAngle, submenuAngles } from "./geometry";
 
 describe("ângulos", () => {
   it("normaliza", () => {
@@ -77,5 +75,54 @@ describe("hitTest", () => {
     const sub = { parentAngle: -45, count: 3 };
     const p = polar(0, 0, LAYOUT.mainInner + 20, -45);
     expect(hitTest(p.x, p.y, 8, dz, sub)).toEqual({ ring: "main", index: 1 });
+  });
+});
+
+describe("barra compacta", () => {
+  it("botões lado a lado na largura da fatia-pai, centrados nela", () => {
+    const parent = sliceAngle(3, 7);
+    const span = compactItemSpan(6, 7);
+    const angles = compactAngles(parent, 6, 7);
+    expect(span * 6).toBeCloseTo((360 / 7) * COMPACT.fill, 6);
+    expect((angles[0] + angles[5]) / 2).toBeCloseTo(parent, 6);
+  });
+
+  it("fatia estreita: cada botão tem a largura mínima", () => {
+    expect(compactItemSpan(8, 10)).toBe(COMPACT.minItemSpan);
+  });
+
+  it("hitTest usa a geometria da barra quando compact", () => {
+    const parent = sliceAngle(0, 6); // topo
+    const angles = compactAngles(parent, 5, 6);
+    const r = (COMPACT.inner + COMPACT.outer) / 2;
+    const sub = { parentAngle: parent, count: 5, compact: true };
+    angles.forEach((a, i) => {
+      const p = polar(0, 0, r, a);
+      expect(hitTest(p.x, p.y, 6, 40, sub)).toEqual({ ring: "sub", index: i });
+    });
+    // Fora da barra (ângulo de outra fatia), mesmo no raio dela: volta para as fatias principais.
+    const out = polar(0, 0, r, sliceAngle(2, 6));
+    expect(hitTest(out.x, out.y, 6, 40, sub)).toEqual({ ring: "main", index: 2 });
+  });
+});
+
+describe("barra compacta › ordem de leitura", () => {
+  const points = (parent: number) => compactAngles(parent, 3, 6).map((a) => polar(0, 0, 300, a));
+  it("em cima e embaixo lê da esquerda para a direita", () => {
+    for (const parent of [-90, 90]) {
+      const [a, b, c] = points(parent);
+      expect(a.x).toBeLessThan(b.x);
+      expect(b.x).toBeLessThan(c.x);
+    }
+  });
+  it("nas laterais lê de cima para baixo", () => {
+    for (const parent of [0, 180]) {
+      const [a, b, c] = points(parent);
+      expect(a.y).toBeLessThan(b.y);
+      expect(b.y).toBeLessThan(c.y);
+    }
+  });
+  it("inverte só embaixo e na esquerda", () => {
+    expect([-90, 0, 90, 180].map(compactReadsReversed)).toEqual([false, false, true, true]);
   });
 });

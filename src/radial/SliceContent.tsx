@@ -8,7 +8,8 @@ interface Props {
   /** Imagem própria; enquanto carrega (ou se falhar), mostra `icon`. */
   image?: string;
   label: string;
-  size: "main" | "sub";
+  /** "compact" = só o ícone, centrado (barra compacta). */
+  size: "main" | "sub" | "compact";
   active?: boolean;
 }
 
@@ -16,9 +17,9 @@ interface Props {
 export function SliceContent({ x, y, icon, image, label, size, active }: Props) {
   const src = useIconImage(image);
   const Icon = getIcon(icon);
-  const iconSize = size === "main" ? 30 : 26;
+  const iconSize = size === "main" ? 30 : size === "sub" ? 26 : 22;
   const labelOffset = size === "main" ? 22 : 18;
-  const iconOffset = size === "main" ? -14 : -12;
+  const iconOffset = size === "main" ? -14 : size === "sub" ? -12 : 0;
   return (
     <g className="slice-content" pointerEvents="none">
       {src ? (
@@ -42,9 +43,11 @@ export function SliceContent({ x, y, icon, image, label, size, active }: Props) 
           className="slice-icon"
         />
       )}
-      <text x={x} y={y + labelOffset} className={`slice-label slice-label--${size}`} textAnchor="middle">
-        {label.toUpperCase()}
-      </text>
+      {size !== "compact" && (
+        <text x={x} y={y + labelOffset} className={`slice-label slice-label--${size}`} textAnchor="middle">
+          {label.toUpperCase()}
+        </text>
+      )}
       {active && size === "main" && (
         <rect x={x - 10} y={y + labelOffset + 12} width={20} height={2.5} rx={1.25} className="slice-marker" />
       )}

@@ -167,7 +167,11 @@ function RadialMenu({ config }: { config: Config }) {
       const dx = (clientX - s.center.x) / scale;
       const dy = (clientY - s.center.y) / scale;
       const sub = s.openMain !== null && s.children.length
-        ? { parentAngle: sliceAngle(s.openMain, s.items.length), count: s.children.length }
+        ? {
+            parentAngle: sliceAngle(s.openMain, s.items.length),
+            count: s.children.length,
+            compact: s.items[s.openMain]?.submenuStyle === "compact",
+          }
         : null;
       return { ...hitTest(dx, dy, s.items.length, config.behavior.deadZonePx, sub), r: Math.hypot(dx, dy) };
     },
