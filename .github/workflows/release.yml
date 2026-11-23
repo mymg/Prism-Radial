@@ -1,9 +1,10 @@
 name: Release
 
 # Uma tag v* (ex.: v0.2.0) gera uma Release em rascunho com o instalador NSIS anexado.
+# "V*" também: o GitHub diferencia maiúsculas, e uma tag V0.7.0 não disparava o build.
 on:
   push:
-    tags: ["v*"]
+    tags: ["v*", "V*"]
 
 permissions:
   contents: write
